@@ -20,9 +20,8 @@ public:
     float height;
     Texture2D texture;
     uint8_t layer = 0;
-    bool is_focused;
 
-    Rectangle rect() const
+    inline Rectangle rect() const
     {
         return { pos.x, pos.y, width, height };
     }
