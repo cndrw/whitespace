@@ -1,11 +1,16 @@
 #pragma once
 
-class Layer
+namespace Core
 {
-public:
-    virtual ~Layer() = default;
-    virtual void update() {};
-    virtual void render() {};
-    void transition_to();
-        // Application::get().push_layer<Layer>();
-};
+    class Layer
+    {
+    public:
+        virtual void init() {};
+        virtual void update() {};
+        virtual void render() {};
+        virtual ~Layer() = default;
+        void transition_to();
+            // Application::get().push_layer<Layer>();
+    };
+
+}

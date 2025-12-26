@@ -5,6 +5,7 @@
 
 #include "CanvasLayer.h"
 #include "SceneElement.h"
+#include "Event.h"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -34,7 +35,11 @@ CanvasLayer::CanvasLayer()
     sprite_element->texture = LoadTexture(img.string().c_str());
 
     m_sprite_elements[sprite_element->layer].push_back(sprite_element);
-};
+}
+
+void CanvasLayer::init()
+{
+}
 
 void CanvasLayer::update()
 {
@@ -53,6 +58,7 @@ void CanvasLayer::update()
     if (IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT)) 
     {
         m_focused_sprite_elem->pos = Vector2Subtract(cursor_pos, m_sprite_drag_offset);
+        on_element_changed.invoke(m_focused_sprite_elem->pos);
     }
 }
 

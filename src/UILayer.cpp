@@ -1,26 +1,46 @@
-#include "Application.h"
-#include "CanvasLayer.h"
-#include "UILayer.h"
-#include "Event.h"
-
 #include <iostream>
-#include <filesystem>
 
+#include "raygui.h"
+#include "raymath.h"
 
-#define EDITOR_DEBUG
+#include "Application.h"
+#include "UILayer.h"
+#include "CanvasLayer.h"
 
+UILayer::UILayer()
+{
+}
 
-#ifdef EDITOR_DEBUG
-    #define DRAW_RECTANGLE_DEBUG(rect) \
-        DrawRectangleRec(rect, MAGENTA)
-#else
-    #define DRAW_RECTANGLE_DEBUG(rect) \
-        ((void)0)
-#endif
+void UILayer::init()
+{
+    Core::Application::get()
+        .get_layer<CanvasLayer>()
+        ->on_element_changed.add_listener([this](Vector2 pos)
+        {
+            update_inspector(pos);
+        });
+}
 
+void UILayer::update()
+{
+}
 
-        
+float x_pos = 0;
 
+void UILayer::render()
+{
+    const float inspector_width = 200;
+    const Vector2 inspector_pos = { (float)GetScreenWidth() - inspector_width - 20, 20 };
+    GuiGroupBox({ inspector_pos.x, inspector_pos.y, inspector_width, 340 }, "Inspector");
+
+    const auto xlabel_pos = Vector2Add(inspector_pos, { 10, 30 });
+    const std::string xlabel = "X: " + std::to_string(x_pos); 
+    GuiLabel({ xlabel_pos.x, xlabel_pos.y, 50, 10}, xlabel.c_str());
+} 
+
+UILayer::~UILayer()
+{
+}
 
 // char xlabel_text[32];
 // char ylabel_text[32];
@@ -52,15 +72,8 @@
 //     // GuiTextBox({ ylabel_pos.x + 20, ylabel_pos.y, 50, 10}, ylabel_text, 32, true);
 // }
 
-
-int main()
+void UILayer::update_inspector(Vector2 pos)
 {
-
-    Core::Application app{};
-    app.push_layer<CanvasLayer>();
-    app.push_layer<UILayer>();
-    app.run();
-    return 0;
+    x_pos = pos.x;
 }
-
 

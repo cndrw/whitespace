@@ -7,16 +7,21 @@
 
 #include "Layer.h"
 #include "SceneElement.h"
+#include "Event.h"
 
 
-class CanvasLayer : public Layer
+class CanvasLayer : public Core::Layer
 {
 public:
     CanvasLayer();
+    virtual void init() override;
     virtual void update() override;
     virtual void render() override;
-    std::shared_ptr<SpriteElement> determine_focused_element(const Vector2 cursor_pos);
     virtual ~CanvasLayer();
+    Core::Event<Vector2> on_element_changed;
+
+private:
+    std::shared_ptr<SpriteElement> determine_focused_element(const Vector2 cursor_pos);
 
 private:
     std::map<uint8_t, std::vector<std::shared_ptr<SpriteElement>>> m_sprite_elements;

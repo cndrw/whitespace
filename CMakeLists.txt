@@ -10,9 +10,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
-set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
-set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -21,6 +18,10 @@ FetchContent_Declare(
   GIT_TAG 5.0
 )
 FetchContent_MakeAvailable(raylib)
+
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 
 # raylib als SYSTEM include markieren
 get_target_property(RAYLIB_INCLUDE_DIRS raylib INTERFACE_INCLUDE_DIRECTORIES)
@@ -35,6 +36,7 @@ add_compile_options(-Wall -Wextra)
 add_library(${PROJECT_NAME}_lib STATIC src/Application.cpp
                                        src/CanvasLayer.cpp
                                        src/Layer.cpp
+                                       src/UILayer.cpp
 )
 
 # add an executabel and assign files to it
