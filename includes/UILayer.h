@@ -2,6 +2,7 @@
 
 #include "Layer.h"
 #include "Event.h"
+#include "Inspector.h"
 
 class UILayer : public Core::Layer
 {
@@ -15,4 +16,6 @@ public:
 private:
     void update_inspector(Vector2 pos);
 
+private:
+    Inspector m_inspector;
 };

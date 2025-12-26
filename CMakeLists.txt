@@ -37,6 +37,7 @@ add_library(${PROJECT_NAME}_lib STATIC src/Application.cpp
                                        src/CanvasLayer.cpp
                                        src/Layer.cpp
                                        src/UILayer.cpp
+                                       src/Inspector.cpp
 )
 
 # add an executabel and assign files to it

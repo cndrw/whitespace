@@ -35,7 +35,6 @@ namespace Core
 			return nullptr;
 		}
 
-
     private:
         std::vector<std::unique_ptr<Layer>> m_layers;
         bool m_is_running;
