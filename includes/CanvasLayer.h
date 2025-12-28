@@ -2,6 +2,8 @@
 
 #include <map>
 #include <vector>
+#include <optional>
+#include <filesystem>
 
 #include "raylib.h"
 
@@ -18,10 +20,14 @@ public:
     virtual void update() override;
     virtual void render() override;
     virtual ~CanvasLayer();
-    Core::Event<Vector2> on_element_changed;
+    Core::Event<const std::optional<SpriteElement>&> on_element_changed;
+    
 
 private:
     std::shared_ptr<SpriteElement> determine_focused_element(const Vector2 cursor_pos);
+    void draw_arrow(int width, int height, float angle, Color color) const;
+    void add_scene_element(const std::filesystem::path& path);
+    std::string resolve_naming(const std::filesystem::path& path) const;
 
 private:
     std::map<uint8_t, std::vector<std::shared_ptr<SpriteElement>>> m_sprite_elements;

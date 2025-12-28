@@ -9,17 +9,22 @@
 #include "application.h"
 #include "layer.h"
 
+
 namespace Core
 {
+    constexpr auto WINDOW_WIDTH { 1280 };
+    constexpr auto WINDOW_HEIGHT { 720 };
+
     static Application* s_application = nullptr;
 
     Application::Application()
     {
         s_application = this;
         SetConfigFlags(FLAG_WINDOW_RESIZABLE);  // Window configuration flags
-        InitWindow(800, 400, "Whitespace");
+        InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Whitespace");
         SetTargetFPS(60);
         GuiLoadStyleCandy();
+        GuiSetStyle(DEFAULT, TEXT_SIZE, 15);
     }
 
     void Application::run()

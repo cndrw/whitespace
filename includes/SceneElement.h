@@ -18,6 +18,7 @@ class SpriteElement : public SceneElement
 public:
     float width;
     float height;
+    float angle;
     Texture2D texture;
     uint8_t layer = 0;
 

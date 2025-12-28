@@ -3,6 +3,7 @@
 #include "Layer.h"
 #include "Event.h"
 #include "Inspector.h"
+#include "AssetExplorer.h"
 
 class UILayer : public Core::Layer
 {
@@ -12,10 +13,11 @@ public:
     virtual void update() override;
     virtual void render() override;
     virtual ~UILayer();
-
-private:
-    void update_inspector(Vector2 pos);
+    
+    AssetExplorer* get_asset_explorer() { return &m_asset_explorer; } 
 
 private:
     Inspector m_inspector;
+    AssetExplorer m_asset_explorer;
+
 };

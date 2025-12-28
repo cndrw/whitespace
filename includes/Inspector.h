@@ -1,12 +1,16 @@
 #pragma once
 
+#include <optional>
+
 #include "raymath.h"
+
+#include "SceneElement.h"
 
 class Inspector
 {
 public:
     void set_rect(const Rectangle rect);
-    void update_content(Vector2 pos); 
+    void update_content(const std::optional<SpriteElement>& element); 
     void render();
 
 private:
@@ -14,5 +18,6 @@ private:
 
 private:
     Rectangle m_rect;
-    Vector2 m_inspected_element;
+    int m_label_width, m_label_height;
+    SpriteElement m_focused_element;
 };

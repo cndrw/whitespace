@@ -32,6 +32,10 @@ namespace Core
                     fn(args...);
                 }
             }
+            else
+            {
+                std::cout << "No listener registrated!\n";
+            }
         }
 
     private:
