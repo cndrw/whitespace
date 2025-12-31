@@ -6,6 +6,8 @@
 
 #include "layer.h"
 
+#include "AssetManager.h"
+
 namespace Core
 {
     class Application
@@ -16,11 +18,11 @@ namespace Core
         void run();
         void stop();
 
-        template<typename TLayer>
+        template<typename TLayer, typename... Args>
         requires(std::derived_from<TLayer, Layer>)
-        void push_layer()
+        void push_layer(Args&&... args)
         {
-            m_layers.push_back(std::make_unique<TLayer>());
+            m_layers.push_back(std::make_unique<TLayer>(std::forward<Args>(args)...));
         }
 
         template<typename TLayer>
@@ -35,8 +37,11 @@ namespace Core
 			return nullptr;
 		}
 
+        AssetManager* get_asset_manager();
+
     private:
         std::vector<std::unique_ptr<Layer>> m_layers;
+        AssetManager m_asset_manager;
         bool m_is_running;
     };
 

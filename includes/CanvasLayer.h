@@ -10,6 +10,8 @@
 #include "Layer.h"
 #include "SceneElement.h"
 #include "Event.h"
+#include "AssetExplorer.h"
+#include "AssetManager.h"
 
 
 class CanvasLayer : public Core::Layer
@@ -26,8 +28,10 @@ public:
 private:
     std::shared_ptr<SpriteElement> determine_focused_element(const Vector2 cursor_pos);
     void draw_arrow(int width, int height, float angle, Color color) const;
-    void add_scene_element(const std::filesystem::path& path);
+    void add_scene_element(const Core::Asset& asset);
     std::string resolve_naming(const std::filesystem::path& path) const;
+    void save_scene();
+    void load_scene();
 
 private:
     std::map<uint8_t, std::vector<std::shared_ptr<SpriteElement>>> m_sprite_elements;

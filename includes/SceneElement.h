@@ -21,6 +21,8 @@ public:
     float angle;
     Texture2D texture;
     uint8_t layer = 0;
+    int ppu;
+    int asset_id;
 
     inline Rectangle rect() const
     {

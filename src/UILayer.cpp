@@ -12,7 +12,7 @@
 UILayer::UILayer()
 {
     m_inspector.set_rect((Rectangle) {(float)GetScreenWidth() - 200 - 20, 20, 200, 300});
-    m_asset_explorer.set_root_dir("D:\\stuff\\repos\\whitespace\\assets");
+    m_asset_explorer.set_root_dir("D:\\stuff\\repos\\whitespace\\example\\assets");
     m_asset_explorer.set_rect((Rectangle) {100, (float)GetScreenHeight() - 200, 500, 180});
 }
 

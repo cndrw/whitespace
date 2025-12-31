@@ -33,12 +33,16 @@ target_include_directories(raylib
 # add some compile options
 add_compile_options(-Wall -Wextra)
 
+add_subdirectory(vendor/yaml-cpp)
+
 add_library(${PROJECT_NAME}_lib STATIC src/Application.cpp
                                        src/CanvasLayer.cpp
                                        src/Layer.cpp
                                        src/UILayer.cpp
                                        src/Inspector.cpp
                                        src/AssetExplorer.cpp
+                                       src/AssetManager.cpp
+                                       src/DataPersistanceLayer.cpp
 )
 
 # add an executabel and assign files to it
@@ -60,5 +64,5 @@ target_include_directories(${PROJECT_NAME}_lib PRIVATE includes)
 target_include_directories(${PROJECT_NAME}_exec PRIVATE includes)
 
 target_link_libraries(${PROJECT_NAME}_exec PRIVATE raylib)
-target_link_libraries(${PROJECT_NAME}_lib PRIVATE raylib)
-target_link_libraries(${PROJECT_NAME}_exec PRIVATE ${PROJECT_NAME}_lib)
+target_link_libraries(${PROJECT_NAME}_lib PRIVATE raylib yaml-cpp)
+target_link_libraries(${PROJECT_NAME}_exec PRIVATE ${PROJECT_NAME}_lib yaml-cpp)

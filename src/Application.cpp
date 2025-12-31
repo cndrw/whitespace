@@ -65,6 +65,10 @@ namespace Core
         m_is_running = false;
     }
 
+    AssetManager *Application::get_asset_manager()
+    {
+        return &m_asset_manager;
+    }
 
     Application& Application::get()
     {

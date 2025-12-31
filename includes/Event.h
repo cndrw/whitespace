@@ -14,8 +14,9 @@ namespace Core
         using CallbackFn = std::function<void(TArgs...)>;
         int add_listener(CallbackFn func)
         {
-            m_listener[++current_id] = func;
-            return current_id;
+            m_current_id++;
+            m_listener[m_current_id] = func;
+            return m_current_id;
         }
 
         void remove_listener(int id)
@@ -40,6 +41,6 @@ namespace Core
 
     private:
         std::unordered_map<int, CallbackFn> m_listener;
-        int current_id = 0;
+        int m_current_id = 0;
     };
 }
