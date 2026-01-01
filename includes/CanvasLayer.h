@@ -22,8 +22,8 @@ public:
     virtual void update() override;
     virtual void render() override;
     virtual ~CanvasLayer();
+    void load_scene(const std::string& scene_name);
     Core::Event<const std::optional<SpriteElement>&> on_element_changed;
-    
 
 private:
     std::shared_ptr<SpriteElement> determine_focused_element(const Vector2 cursor_pos);
@@ -31,7 +31,6 @@ private:
     void add_scene_element(const Core::Asset& asset);
     std::string resolve_naming(const std::filesystem::path& path) const;
     void save_scene();
-    void load_scene();
 
 private:
     std::map<uint8_t, std::vector<std::shared_ptr<SpriteElement>>> m_sprite_elements;

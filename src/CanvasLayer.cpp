@@ -19,6 +19,14 @@
 
 CanvasLayer::CanvasLayer()
 {
+    // try
+    // {
+    //     load_scene("scene.yaml");
+    // }
+    // catch (const std::out_of_range& e)
+    // {
+    //     std::cerr << std::format("{} -> element not found in map - unkown asset id?\n", e.what());
+    // }
 }  
 
 void CanvasLayer::init()
@@ -31,15 +39,6 @@ void CanvasLayer::init()
             std::cout << "add: " << asset.path << std::endl;
             add_scene_element(asset);
         });
-
-    try
-    {
-        load_scene();
-    }
-    catch (const std::out_of_range& e)
-    {
-        std::cerr << std::format("{} -> element not found in map - unkown asset id?\n", e.what());
-    }
 }
 
 void CanvasLayer::add_scene_element(const Core::Asset& asset)
@@ -226,17 +225,10 @@ void CanvasLayer::save_scene()
     Core::Application::get().get_layer<DataPersitanceLayer>()->save_scene(scene);
 }
 
-void CanvasLayer::load_scene()
+void CanvasLayer::load_scene(const std::string& scene_name)
 {
-    // YAML::Node project_file = YAML::LoadFile(path.string());
-
-    // // TODO: project file read logic should be elsewhere...
-    // std::filesystem::path asset_root = path.parent_path() / project_file["assetRoot"].as<std::string>();
-    // std::filesystem::path scenes_root = path.parent_path() / project_file["scenesRoot"].as<std::string>();
-
-    // const auto scene = YAML::LoadFile((scenes_root / "scene.yaml").string());
     auto& app = Core::Application::get();
-    const auto scene = app.get_layer<DataPersitanceLayer>()->load_scene("scene.yaml");
+    const auto scene = app.get_layer<DataPersitanceLayer>()->load_scene(scene_name);
 
     auto* const am = app.get_asset_manager();
     for (const auto& it : scene["SpriteElements"])

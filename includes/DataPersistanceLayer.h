@@ -9,10 +9,7 @@
 class DataPersitanceLayer : public Core::Layer
 {
 public:
-    DataPersitanceLayer(std::filesystem::path root) : m_root(std::move(root)) {}
-    // virtual void init() override;
-    // virtual void update() override;
-    // virtual void render() override;
+    void set_saves_root(std::filesystem::path root);
     void save_scene(const YAML::Node& scene);
     YAML::Node load_scene(const std::filesystem::path& file);
     virtual ~DataPersitanceLayer() {}

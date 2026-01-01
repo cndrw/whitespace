@@ -43,6 +43,8 @@ add_library(${PROJECT_NAME}_lib STATIC src/Application.cpp
                                        src/AssetExplorer.cpp
                                        src/AssetManager.cpp
                                        src/DataPersistanceLayer.cpp
+                                       src/FunctionRibbon.cpp
+                                       src/AppLayer.cpp
 )
 
 # add an executabel and assign files to it

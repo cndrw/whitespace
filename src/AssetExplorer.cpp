@@ -40,6 +40,11 @@ void AssetExplorer::render()
 {
     GuiGroupBox(m_window_rect, "AssetExplorer");
 
+    if (m_root.empty())
+    {
+        return;
+    }
+
     int idx = 0;
     float preview_size = 80;
     float padding = 10;

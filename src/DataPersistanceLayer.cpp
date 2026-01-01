@@ -4,7 +4,12 @@
 
 #include "DataPersistanceLayer.h"
 
-void DataPersitanceLayer::save_scene(const YAML::Node& scene)
+void DataPersitanceLayer::set_saves_root(std::filesystem::path root)
+{
+    m_root = root;
+}
+
+void DataPersitanceLayer::save_scene(const YAML::Node &scene)
 {
     const auto dest_path = m_root / "scene.yaml";
     std::ofstream fout(dest_path);
