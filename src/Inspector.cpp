@@ -11,11 +11,14 @@ void Inspector::render()
 {
     GuiGroupBox(m_rect, "Inspector");
 
-    draw_label({10, 10}, std::format("Name: {}", m_focused_element.name));
-    draw_label({10, 30}, std::format("X: {}", m_focused_element.pos.x));
-    draw_label({10, 50}, std::format("Y: {}", m_focused_element.pos.y));
-    draw_label({10, 70}, std::format("Angle: {}", m_focused_element.angle));
-    draw_label({10, 90}, std::format("Layer: {}", m_focused_element.layer));
+    if (!m_is_unselected)
+    {
+        draw_label({10, 10}, std::format("Name: {}", m_focused_element.name));
+        draw_label({10, 30}, std::format("X: {}", m_focused_element.pos.x));
+        draw_label({10, 50}, std::format("Y: {}", m_focused_element.pos.y));
+        draw_label({10, 70}, std::format("Angle: {}", m_focused_element.angle));
+        draw_label({10, 90}, std::format("Layer: {}", m_focused_element.layer));
+    }
 }
 
 void Inspector::draw_label(Vector2 pos, std::string text)
@@ -37,8 +40,10 @@ void Inspector::set_rect(const Rectangle rect)
 
 void Inspector::update_content(const std::optional<SpriteElement>& element)
 {
-    if (element.has_value())
+    m_is_unselected = !element.has_value();
+    if (!m_is_unselected)
     {
         m_focused_element = element.value();
     }
+
 }

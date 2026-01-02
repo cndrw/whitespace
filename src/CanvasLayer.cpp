@@ -17,16 +17,27 @@
 #include "SceneElement.h"
 #include "Event.h"
 
+
+// temp function should be elswhere...
+Rectangle CanvasLayer::transform_to_screen(const Rectangle& rect)
+{
+    const auto offset = (Vector2) {
+        (float)GetScreenWidth() / 2,
+        (float)GetScreenHeight() / 2
+    };
+
+    const auto res_rect = (Rectangle) {
+        .x = (rect.x + m_origin.x - offset.x) * m_scale + offset.x, 
+        .y = (rect.y + m_origin.y - offset.y) * m_scale + offset.y, 
+        .width = rect.width * m_scale,
+        .height = rect.height * m_scale
+    };
+
+    return  res_rect;
+}
+
 CanvasLayer::CanvasLayer()
 {
-    // try
-    // {
-    //     load_scene("scene.yaml");
-    // }
-    // catch (const std::out_of_range& e)
-    // {
-    //     std::cerr << std::format("{} -> element not found in map - unkown asset id?\n", e.what());
-    // }
 }  
 
 void CanvasLayer::init()
@@ -102,6 +113,7 @@ std::string CanvasLayer::resolve_naming(const std::filesystem::path& path) const
 void CanvasLayer::update()
 {
     const Vector2 cursor_pos = GetMousePosition();
+    const Vector2 wheel_move = GetMouseWheelMoveV();
 
     if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
     {
@@ -114,6 +126,18 @@ void CanvasLayer::update()
     if (!m_focused_sprite_elem)
     {
         on_element_changed.invoke(std::nullopt);
+
+        if (IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT)) 
+        {
+            const Vector2 delta_pos = GetMouseDelta();
+            m_origin.x += delta_pos.x;
+            m_origin.y += delta_pos.y;
+        }
+        else if (wheel_move.y != 0)
+        {
+            m_scale += wheel_move.y * 0.5;
+        }
+
         return;
     }
 
@@ -137,14 +161,16 @@ void CanvasLayer::update()
 
 void CanvasLayer::render()
 {
+    draw_reference_resolution({1920, 1080});
 
     for (const auto& [_, elements] : m_sprite_elements)
     {
         for (const auto& element : elements)
         {
+            // const Vector2 render_pos = { m_origin.x + element->pos.x, m_origin.y + element->pos.y };
             DrawTexturePro(element->texture,
                 { 0.0, 0.0, (float)element->texture.width, (float)element->texture.height },
-                element->rect(), { 0, 0 }, 0, RAYWHITE
+                transform_to_screen(element->rect()), { 0, 0 }, 0, RAYWHITE
             );
         }
     }
@@ -253,6 +279,26 @@ void CanvasLayer::load_scene(const std::string& scene_name)
     }
 }
 
+void CanvasLayer::draw_reference_resolution(const Vector2 res)
+{
+
+    const Rectangle ref_rect = { 0, 0, res.x, res.y };
+    DrawRectangleLinesEx(transform_to_screen(ref_rect), 2, ORANGE);
+    const std::string res_text = std::format("{}x{}", res.x, res.y);
+    constexpr auto padding { 5 };
+    constexpr auto font_size { 25 };
+    // TODO: why is it no working when i scale it with padding? (only works if applied after)
+    Rectangle ref_label = { m_origin.x + padding, m_origin.y - font_size - padding, 0, 0 };
+    ref_label = transform_to_screen(ref_label);
+    DrawText(
+        res_text.c_str(),
+        ref_label.x,
+        ref_label.y,
+        font_size, ORANGE
+    );
+}
+
 CanvasLayer::~CanvasLayer()
 {
 }
+

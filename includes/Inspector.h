@@ -20,4 +20,5 @@ private:
     Rectangle m_rect;
     int m_label_width, m_label_height;
     SpriteElement m_focused_element;
+    bool m_is_unselected;
 };

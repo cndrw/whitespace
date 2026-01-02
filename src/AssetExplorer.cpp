@@ -48,6 +48,7 @@ void AssetExplorer::render()
     int idx = 0;
     float preview_size = 80;
     float padding = 10;
+
     for (const auto& e : std::filesystem::directory_iterator(m_root))
     {
         Rectangle rect = {
@@ -63,13 +64,6 @@ void AssetExplorer::render()
 
         if (GuiButton(rect, GuiIconText(icon, "")) && !e.is_directory())
         {
-            // auto asset_entry = std::ranges::find_if(m_assets,
-            //     [&e](const Asset& a){ return a.path == e.path(); });
-
-            // if (asset_entry != m_assets.end())
-            // {
-            //     add_scene_element.invoke(*asset_entry);
-            // };
             auto* const am = Core::Application::get().get_asset_manager();
             add_scene_element.invoke(am->get_asset(m_assets[e.path()]));
         }
