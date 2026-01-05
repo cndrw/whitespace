@@ -8,6 +8,7 @@ namespace Core
 {
     uint32_t AssetManager::add_asset(const std::filesystem::path& path)
     {
+        std::cout << "adde new asset\n";
         m_current_id++;
         m_assets[m_current_id] = (Asset) {
             .path = path,

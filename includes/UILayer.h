@@ -13,6 +13,7 @@ class UILayer : public Core::Layer
 public:
     UILayer();
     virtual void init() override;
+    bool on_click() override;
     virtual void update() override;
     virtual void render() override;
     virtual ~UILayer();
@@ -21,6 +22,7 @@ public:
     AssetExplorer* get_asset_explorer() { return &m_asset_explorer; } 
 
 private:
+    std::vector<Rectangle> m_clickable_obj;
     Inspector m_inspector;
     AssetExplorer m_asset_explorer;
     FunctionRibbon m_func_ribbon;

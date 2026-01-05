@@ -17,6 +17,8 @@
 #include "SceneElement.h"
 #include "Event.h"
 
+auto left_clicked { false };
+auto left_down { false };
 
 // temp function should be elswhere...
 Rectangle CanvasLayer::transform_to_screen(const Rectangle& rect)
@@ -115,7 +117,7 @@ void CanvasLayer::update()
     const Vector2 cursor_pos = GetMousePosition();
     const Vector2 wheel_move = GetMouseWheelMoveV();
 
-    if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
+    if (left_clicked)
     {
         if ((m_focused_sprite_elem = determine_focused_element(cursor_pos)))
         {
@@ -127,7 +129,7 @@ void CanvasLayer::update()
     {
         on_element_changed.invoke(std::nullopt);
 
-        if (IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT)) 
+        if (left_down) 
         {
             const Vector2 delta_pos = GetMouseDelta();
             m_origin.x += delta_pos.x;
@@ -138,10 +140,12 @@ void CanvasLayer::update()
             m_scale += wheel_move.y * 0.5;
         }
 
+        left_clicked = false;
+        left_down = false;
         return;
     }
 
-    if (IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT)) 
+    if (left_down) 
     {
         Vector2 pos = Vector2Subtract(cursor_pos, m_sprite_drag_offset);
         pos = {
@@ -157,6 +161,9 @@ void CanvasLayer::update()
     {
         save_scene();
     }
+
+    left_clicked = false;
+    left_down = false;
 }
 
 void CanvasLayer::render()
@@ -302,3 +309,9 @@ CanvasLayer::~CanvasLayer()
 {
 }
 
+bool CanvasLayer::on_click()
+{
+    left_clicked = IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT);
+    left_down = IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT);
+    return false;
+}

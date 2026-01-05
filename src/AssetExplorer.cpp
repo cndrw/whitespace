@@ -8,32 +8,75 @@
 #include "AssetExplorer.h"
 #include "Utils.h"
 
-// temporary function until asset data will be saved as well
-void AssetExplorer::create_assets()
+UIElement AssetExplorer::make_dir_preview(
+    const Rectangle& rect, const std::filesystem::path& dir, float preview_size
+)
 {
-    auto* const am = Core::Application::get().get_asset_manager();
-    // TODO: change to recursive_iterator(?) so subdirectories are included 
-    for (const auto& entry : std::filesystem::directory_iterator(m_root))
-    {
-        if (entry.is_directory())
-        {
-            m_cur_directories.push_back(entry);
-            continue;
+    return (UIElement) {
+        .rect = rect,
+        .on_click = [this, dir] {
+            open_asset_directory(dir);
+        },
+        .render = [this, rect, preview_size, name = dir.filename().string()] {
+            GuiButton(rect, GuiIconText(ICON_FOLDER, ""));
+            draw_asset_label(rect, name.c_str(), preview_size);
         }
-        else // is "else" really ok here?
-        {
-            m_cur_files.push_back(entry);
-        }
+    };
+}
 
-        m_assets[entry] = am->add_asset(entry);
-    }
+UIElement AssetExplorer::make_asset_preview(
+    const Rectangle& rect, const std::filesystem::path& file, float preview_size
+)
+{
+    return (UIElement) {
+        .rect = rect,
+        .on_click = [this, file] {
+            auto* const am = Core::Application::get().get_asset_manager();
+            // add_scene_element.invoke(am->get_asset(m_assets[entry]));
+            on_asset_prev_clicked.invoke(am->get_asset(m_assets[file]));
+        },
+        .render = [this, rect, preview_size, name = file.filename().string()] {
+            GuiButton(rect, GuiIconText(ICON_FILE, ""));
+            draw_asset_label(rect, name.c_str(), preview_size);
+        }
+    };
 }
 
 void AssetExplorer::set_root_dir(const std::filesystem::path& root)
 {
     m_root = root;
     m_current_directory = root;
-    create_assets();
+    build_explorer_view(m_current_directory);
+}
+
+void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
+{
+    m_asset_prevs.clear();
+
+    int idx = 0;
+    constexpr float preview_size = 80.f;
+    constexpr float padding = 10.f;
+
+    auto* am = Core::Application::get().get_asset_manager();
+
+    m_asset_prevs.push_back(
+        make_dir_preview(place_preview_rect(idx++, preview_size, padding), dir.parent_path(), preview_size)
+    );
+
+    for (const auto& entry : std::filesystem::directory_iterator(dir))
+    {
+        const auto rect = place_preview_rect(idx++, preview_size, padding);
+
+        if (entry.is_directory())
+        {
+            m_asset_prevs.push_back(make_dir_preview(rect, entry, preview_size));
+        }
+        else
+        {
+            m_assets.try_emplace(entry, am->add_asset(entry));
+            m_asset_prevs.push_back(make_asset_preview(rect, entry, preview_size));
+        }
+    }
 }
 
 void AssetExplorer::set_rect(const Rectangle rect)
@@ -50,35 +93,27 @@ void AssetExplorer::render()
         return;
     }
 
-    int idx = 0;
-    float preview_size = 80;
-    float padding = 10;
-
-    for (const auto& entry : m_cur_directories)
+    for (const auto& prev : m_asset_prevs)
     {
-        const auto rect = place_preview_rect(idx, preview_size, padding);
-        if (GuiButton(rect, GuiIconText(GuiIconName::ICON_FOLDER, "")))
+        prev.render();
+    }
+}
+
+bool AssetExplorer::on_click()
+{
+    const Vector2 mpos = GetMousePosition();
+    bool handled = false;
+
+    for (const auto& prev : m_asset_prevs)
+    {
+        if (CheckCollisionPointRec(mpos, prev.rect))
         {
-            open_asset_directory(entry);
-            return;
+            prev.on_click();
+            handled = true;
         }
-        draw_asset_label(rect, entry.filename().string().c_str(), preview_size);
-        idx++;
     }
 
-    for (const auto& entry : m_cur_files)
-    {
-        const GuiIconName icon = GuiIconName::ICON_FILE;
-        const auto rect = place_preview_rect(idx, preview_size, padding);
-
-        if (GuiButton(rect, GuiIconText(icon, "")))
-        {
-            auto* const am = Core::Application::get().get_asset_manager();
-            add_scene_element.invoke(am->get_asset(m_assets[entry]));
-        }
-        draw_asset_label(rect, entry.filename().string().c_str(), preview_size);
-        idx++;
-    }
+    return handled;
 }
 
 Rectangle AssetExplorer::place_preview_rect(int idx, float preview_size, float padding) const
@@ -108,19 +143,6 @@ void AssetExplorer::draw_asset_label(
 
 void AssetExplorer::open_asset_directory(std::filesystem::path dir)
 {
-    m_cur_directories.clear();
-    m_cur_files.clear();
-
-    m_cur_directories.push_back(dir.parent_path());
-    for (const auto& entry : std::filesystem::directory_iterator(dir))
-    {
-        if (entry.is_directory())
-        {
-            m_cur_directories.push_back(entry);
-        }
-        else // is "else" really ok here?
-        {
-            m_cur_files.push_back(entry);
-        }
-    }
+    m_current_directory = dir;
+    build_explorer_view(m_current_directory);
 }

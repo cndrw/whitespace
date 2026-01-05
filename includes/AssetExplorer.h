@@ -2,11 +2,13 @@
 
 #include <filesystem>
 #include <unordered_map>
+#include <vector>
 
 #include "raylib.h"
 
 #include "Event.h"
 #include "AssetManager.h"
+#include "UIElements.h"
 
 
 class AssetExplorer
@@ -14,11 +16,16 @@ class AssetExplorer
 public:
     void set_rect(const Rectangle rect);
     void set_root_dir(const std::filesystem::path& root);
-    void create_assets();
+    void build_explorer_view(const std::filesystem::path& root);
+    UIElement make_dir_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
+    UIElement make_asset_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
     void render();
+    bool on_click();
+    Rectangle get_rect() const { return m_window_rect; }
 
 public:
     Core::Event<Core::Asset> add_scene_element;
+    Core::Event<const Core::Asset&> on_asset_prev_clicked;
 
 private:
     Rectangle place_preview_rect(int idx, float preview_size, float padding) const;
@@ -29,7 +36,6 @@ private:
     std::unordered_map<std::filesystem::path, uint32_t> m_assets;
     std::filesystem::path m_root;
     std::filesystem::path m_current_directory;
-    std::vector<std::filesystem::path> m_cur_directories;
-    std::vector<std::filesystem::path> m_cur_files;
     Rectangle m_window_rect;    
+    std::vector<UIElement> m_asset_prevs; 
 };

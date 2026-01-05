@@ -21,6 +21,7 @@ public:
     virtual void init() override;
     virtual void update() override;
     virtual void render() override;
+    virtual bool on_click() override;
     virtual ~CanvasLayer();
     void load_scene(const std::string& scene_name);
     Core::Event<const std::optional<SpriteElement>&> on_element_changed;

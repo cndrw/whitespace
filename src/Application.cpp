@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <ranges>
+
 #include "raylib.h"
 
 #define RAYGUI_IMPLEMENTATION
@@ -42,6 +44,19 @@ namespace Core
             {
                 stop();
                 break;
+            }
+
+            if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
+            {
+                for (const auto& layer : m_layers | std::views::reverse)
+                {
+                    const bool handled = layer->on_click();
+                    if (handled)
+                    {
+                        std::cout << "click handled\n";
+                        break;
+                    }
+                }
             }
 
             for (const auto& layer : m_layers)

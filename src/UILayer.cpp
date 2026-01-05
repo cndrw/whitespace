@@ -1,5 +1,7 @@
 #include <iostream>
 #include <optional>
+#include <algorithm>
+#include <ranges>
 
 #include "raygui.h"
 #include "raymath.h"
@@ -13,16 +15,22 @@ UILayer::UILayer()
 {
     m_inspector.set_rect((Rectangle) {(float)GetScreenWidth() - 200 - 20, 20, 200, 300});
     m_asset_explorer.set_rect((Rectangle) {100, (float)GetScreenHeight() - 200, 500, 180});
+    m_clickable_obj.push_back(m_inspector.get_rect());
+    m_clickable_obj.push_back(m_asset_explorer.get_rect());
 }
 
 void UILayer::init()
 {
-    Core::Application::get()
-        .get_layer<CanvasLayer>()
-        ->on_element_changed.add_listener([this] (const auto& element)
-        {
-            m_inspector.update_content(element);
-        });
+    auto canvas_layer = Core::Application::get().get_layer<CanvasLayer>();
+    canvas_layer->on_element_changed.add_listener([this] (const auto& element)
+    {
+        m_inspector.update_content(element);
+    });
+
+    m_asset_explorer.on_asset_prev_clicked.add_listener([this] (const auto& element)
+    {
+        m_inspector.update_content(element);
+    });
 }
 
 void UILayer::update()
@@ -43,4 +51,15 @@ UILayer::~UILayer()
 void UILayer::set_asset_root(std::filesystem::path path)
 {
     m_asset_explorer.set_root_dir(path);
+}
+
+bool UILayer::on_click()
+{
+    const Vector2 cursor_pos = GetMousePosition();
+    std::cout << "on_click (UI)\n";
+    return m_asset_explorer.on_click();
+    // return std::ranges::any_of(
+    //     m_clickable_obj,
+    //     [&cursor_pos] (const auto& obj) { return CheckCollisionPointRec(cursor_pos, obj); }
+    // );
 }
