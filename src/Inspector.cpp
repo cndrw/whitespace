@@ -50,6 +50,7 @@ void Inspector::draw_sprite_element_content() const
 void Inspector::draw_asset_element_content() const
 {
     draw_label({10, 10}, std::format("Name: {}", m_focused_asset.path.stem().string().c_str()));
+    draw_label({10, 30}, std::format("PPU: {}", m_focused_asset.ppu));
 }
 
 void Inspector::set_rect(const Rectangle rect)

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <format>
 #include <optional>
 #include <algorithm>
 #include <ranges>
@@ -15,6 +16,7 @@ UILayer::UILayer()
 {
     m_inspector.set_rect((Rectangle) {(float)GetScreenWidth() - 200 - 20, 20, 200, 300});
     m_asset_explorer.set_rect((Rectangle) {100, (float)GetScreenHeight() - 200, 500, 180});
+    m_func_ribbon.set_rect((Rectangle) {0, 0, (float)GetScreenWidth(), 20});
     m_clickable_obj.push_back(m_inspector.get_rect());
     m_clickable_obj.push_back(m_asset_explorer.get_rect());
 }
@@ -31,6 +33,13 @@ void UILayer::init()
     {
         m_inspector.update_content(element);
     });
+
+    Core::Application::get()
+        .get_layer<AppLayer>()
+        ->on_project_update.add_listener([this] (const auto& proj_data)
+        {
+            m_func_ribbon.update_ribbon(proj_data);
+        });
 }
 
 void UILayer::update()
@@ -53,13 +62,8 @@ void UILayer::set_asset_root(std::filesystem::path path)
     m_asset_explorer.set_root_dir(path);
 }
 
-bool UILayer::on_click()
+bool UILayer::process_input()
 {
-    const Vector2 cursor_pos = GetMousePosition();
-    std::cout << "on_click (UI)\n";
-    return m_asset_explorer.on_click();
-    // return std::ranges::any_of(
-    //     m_clickable_obj,
-    //     [&cursor_pos] (const auto& obj) { return CheckCollisionPointRec(cursor_pos, obj); }
-    // );
+    bool res = m_asset_explorer.process_input() || m_func_ribbon.process_input();
+    return res;
 }

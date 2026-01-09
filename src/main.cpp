@@ -8,7 +8,6 @@
 
 #include "yaml-cpp/yaml.h"
 
-
 int main()
 {
     Core::Application app{};
@@ -21,3 +20,10 @@ int main()
 }
 
 
+/* TODO: 
+- wenn man canvas bewegt dann -> sieht man das die boundingbox vom focused element nicht mit
+    transformiert wird
+- screen move -> ctrl + left click
+- scroll für zoom -> geschwindigkeit anpassen
+- wenn man über scene label im ribbon hovered -> alle scenes für das projekt anzeigen
+*/

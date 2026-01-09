@@ -13,7 +13,7 @@ class UILayer : public Core::Layer
 public:
     UILayer();
     virtual void init() override;
-    bool on_click() override;
+    bool process_input() override;
     virtual void update() override;
     virtual void render() override;
     virtual ~UILayer();

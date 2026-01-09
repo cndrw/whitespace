@@ -17,8 +17,6 @@
 #include "SceneElement.h"
 #include "Event.h"
 
-auto left_clicked { false };
-auto left_down { false };
 
 // temp function should be elswhere...
 Rectangle CanvasLayer::transform_to_screen(const Rectangle& rect)
@@ -114,56 +112,6 @@ std::string CanvasLayer::resolve_naming(const std::filesystem::path& path) const
 
 void CanvasLayer::update()
 {
-    const Vector2 cursor_pos = GetMousePosition();
-    const Vector2 wheel_move = GetMouseWheelMoveV();
-
-    if (left_clicked)
-    {
-        if ((m_focused_sprite_elem = determine_focused_element(cursor_pos)))
-        {
-            m_sprite_drag_offset = Vector2Subtract(cursor_pos, m_focused_sprite_elem->pos);
-        }
-    }
-
-    if (!m_focused_sprite_elem)
-    {
-        on_element_changed.invoke(std::nullopt);
-
-        if (left_down) 
-        {
-            const Vector2 delta_pos = GetMouseDelta();
-            m_origin.x += delta_pos.x;
-            m_origin.y += delta_pos.y;
-        }
-        else if (wheel_move.y != 0)
-        {
-            m_scale += wheel_move.y * 0.5;
-        }
-
-        left_clicked = false;
-        left_down = false;
-        return;
-    }
-
-    if (left_down) 
-    {
-        Vector2 pos = Vector2Subtract(cursor_pos, m_sprite_drag_offset);
-        pos = {
-            std::floor(pos.x / m_focused_sprite_elem->ppu) * m_focused_sprite_elem->ppu,
-            std::floor(pos.y / m_focused_sprite_elem->ppu) * m_focused_sprite_elem->ppu
-        }; 
-        
-        m_focused_sprite_elem->pos = pos;
-        on_element_changed.invoke(*m_focused_sprite_elem);
-    }
-
-    if (IsKeyDown(KeyboardKey::KEY_LEFT_CONTROL) && IsKeyPressed(KeyboardKey::KEY_S))
-    {
-        save_scene();
-    }
-
-    left_clicked = false;
-    left_down = false;
 }
 
 void CanvasLayer::render()
@@ -174,7 +122,6 @@ void CanvasLayer::render()
     {
         for (const auto& element : elements)
         {
-            // const Vector2 render_pos = { m_origin.x + element->pos.x, m_origin.y + element->pos.y };
             DrawTexturePro(element->texture,
                 { 0.0, 0.0, (float)element->texture.width, (float)element->texture.height },
                 transform_to_screen(element->rect()), { 0, 0 }, 0, RAYWHITE
@@ -282,7 +229,6 @@ void CanvasLayer::load_scene(const std::string& scene_name)
 
         m_sprite_elements[0].push_back(sprite_element);
         m_focused_sprite_elem = m_sprite_elements[0].back();
-
     }
 }
 
@@ -309,9 +255,70 @@ CanvasLayer::~CanvasLayer()
 {
 }
 
-bool CanvasLayer::on_click()
+bool CanvasLayer::process_input()
 {
-    left_clicked = IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT);
-    left_down = IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT);
+    const Vector2 cursor_pos = GetMousePosition();
+    const Vector2 wheel_move = GetMouseWheelMoveV();
+
+    if (IsKeyDown(KeyboardKey::KEY_LEFT_CONTROL) && IsKeyPressed(KeyboardKey::KEY_S))
+    {
+        save_scene();
+        return true;
+    }
+
+    if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
+    {
+        if ((m_focused_sprite_elem = determine_focused_element(cursor_pos)))
+        {
+            m_sprite_drag_offset = Vector2Subtract(cursor_pos, m_focused_sprite_elem->pos);
+        }
+    }
+
+    if (!m_focused_sprite_elem)
+    {
+        on_element_changed.invoke(std::nullopt);
+
+        if (IsKeyDown(KEY_LEFT_CONTROL) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
+        {
+            const Vector2 delta_pos = GetMouseDelta();
+            m_origin.x += delta_pos.x;
+            m_origin.y += delta_pos.y;
+        }
+        else if (wheel_move.y != 0)
+        {
+            m_scale += wheel_move.y * 0.5;
+        }
+
+        return false;
+    }
+
+    if (IsKeyPressed(KeyboardKey::KEY_DELETE))
+    {
+        auto& elements = m_sprite_elements[m_focused_sprite_elem->layer];
+        elements.erase(
+            std::remove_if(
+                elements.begin(),
+                elements.end(),
+                [this](const auto& elem) { return elem == m_focused_sprite_elem; }
+            ),
+            elements.end()
+        );
+        m_focused_sprite_elem = nullptr;
+        on_element_changed.invoke(std::nullopt);
+        return true;
+    }
+
+    if (IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT))
+    {
+        Vector2 pos = Vector2Subtract(cursor_pos, m_sprite_drag_offset);
+        pos = {
+            std::floor(pos.x / m_focused_sprite_elem->ppu) * m_focused_sprite_elem->ppu,
+            std::floor(pos.y / m_focused_sprite_elem->ppu) * m_focused_sprite_elem->ppu
+        }; 
+        
+        m_focused_sprite_elem->pos = pos;
+        on_element_changed.invoke(*m_focused_sprite_elem);
+    }
+
     return false;
 }

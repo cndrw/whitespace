@@ -11,6 +11,7 @@ namespace Core
     typedef struct {
         std::filesystem::path path;
         Texture2D texture;
+        uint32_t ppu;
         uint32_t id;
     } Asset;
 

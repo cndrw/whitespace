@@ -8,11 +8,11 @@ namespace Core
 {
     uint32_t AssetManager::add_asset(const std::filesystem::path& path)
     {
-        std::cout << "adde new asset\n";
         m_current_id++;
         m_assets[m_current_id] = (Asset) {
             .path = path,
             .texture = LoadTexture(path.string().c_str()),
+            .ppu = 32, // TODO: set default back to 100
             .id = m_current_id
         };
 

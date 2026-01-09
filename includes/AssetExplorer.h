@@ -20,7 +20,7 @@ public:
     UIElement make_dir_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
     UIElement make_asset_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
     void render();
-    bool on_click();
+    bool process_input();
     Rectangle get_rect() const { return m_window_rect; }
 
 public:

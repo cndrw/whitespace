@@ -32,7 +32,7 @@ UIElement AssetExplorer::make_asset_preview(
         .rect = rect,
         .on_click = [this, file] {
             auto* const am = Core::Application::get().get_asset_manager();
-            // add_scene_element.invoke(am->get_asset(m_assets[entry]));
+            add_scene_element.invoke(am->get_asset(m_assets[file]));
             on_asset_prev_clicked.invoke(am->get_asset(m_assets[file]));
         },
         .render = [this, rect, preview_size, name = file.filename().string()] {
@@ -99,21 +99,20 @@ void AssetExplorer::render()
     }
 }
 
-bool AssetExplorer::on_click()
+bool AssetExplorer::process_input()
 {
     const Vector2 mpos = GetMousePosition();
-    bool handled = false;
 
     for (const auto& prev : m_asset_prevs)
     {
-        if (CheckCollisionPointRec(mpos, prev.rect))
+        if (CheckCollisionPointRec(mpos, prev.rect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             prev.on_click();
-            handled = true;
+            return true;
         }
     }
 
-    return handled;
+    return false;
 }
 
 Rectangle AssetExplorer::place_preview_rect(int idx, float preview_size, float padding) const

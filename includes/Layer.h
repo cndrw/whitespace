@@ -6,7 +6,7 @@ namespace Core
     {
     public:
         virtual void init() {}
-        virtual bool on_click() { return false; }
+        virtual bool process_input() { return false; }
         virtual void update() {}
         virtual void render() {}
         virtual ~Layer() = default;

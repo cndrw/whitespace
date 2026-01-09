@@ -46,16 +46,14 @@ namespace Core
                 break;
             }
 
-            if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
+            // process input 
+            // layers receive permission to process user input one by one
+            // if one layer uses the input, it can mark this frame as handled
+            for (const auto& layer : m_layers | std::views::reverse)
             {
-                for (const auto& layer : m_layers | std::views::reverse)
+                if (layer->process_input())
                 {
-                    const bool handled = layer->on_click();
-                    if (handled)
-                    {
-                        std::cout << "click handled\n";
-                        break;
-                    }
+                    break;
                 }
             }
 
