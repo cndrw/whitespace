@@ -31,6 +31,7 @@ private:
     void draw_arrow(int width, int height, float angle, Color color) const;
     void draw_reference_resolution(Vector2 res);
     void add_scene_element(const Core::Asset& asset);
+    void remove_scene_element(const std::shared_ptr<SpriteElement>& element);
     std::string resolve_naming(const std::filesystem::path& path) const;
     void save_scene();
 

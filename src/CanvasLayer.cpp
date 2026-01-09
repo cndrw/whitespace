@@ -17,6 +17,8 @@
 #include "SceneElement.h"
 #include "Event.h"
 
+static constexpr auto SCROLL_SPEED { 0.05f };
+
 
 // temp function should be elswhere...
 Rectangle CanvasLayer::transform_to_screen(const Rectangle& rect)
@@ -67,6 +69,19 @@ void CanvasLayer::add_scene_element(const Core::Asset& asset)
 
     m_sprite_elements[0].push_back(sprite_element);
     m_focused_sprite_elem = m_sprite_elements[0].back();
+}
+
+void CanvasLayer::remove_scene_element(const std::shared_ptr<SpriteElement>& element)
+{
+    auto& elements = m_sprite_elements[element->layer];
+    elements.erase(
+        std::remove_if(
+            elements.begin(),
+            elements.end(),
+            [this](const auto& elem) { return elem == m_focused_sprite_elem; }
+        ),
+        elements.end()
+    );
 }
 
 std::string CanvasLayer::resolve_naming(const std::filesystem::path& path) const
@@ -278,7 +293,7 @@ bool CanvasLayer::process_input()
     {
         on_element_changed.invoke(std::nullopt);
 
-        if (IsKeyDown(KEY_LEFT_CONTROL) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
+        if (IsKeyDown(KEY_SPACE) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
         {
             const Vector2 delta_pos = GetMouseDelta();
             m_origin.x += delta_pos.x;
@@ -286,7 +301,7 @@ bool CanvasLayer::process_input()
         }
         else if (wheel_move.y != 0)
         {
-            m_scale += wheel_move.y * 0.5;
+            m_scale += wheel_move.y * SCROLL_SPEED;
         }
 
         return false;
@@ -294,15 +309,7 @@ bool CanvasLayer::process_input()
 
     if (IsKeyPressed(KeyboardKey::KEY_DELETE))
     {
-        auto& elements = m_sprite_elements[m_focused_sprite_elem->layer];
-        elements.erase(
-            std::remove_if(
-                elements.begin(),
-                elements.end(),
-                [this](const auto& elem) { return elem == m_focused_sprite_elem; }
-            ),
-            elements.end()
-        );
+        remove_scene_element(m_focused_sprite_elem);
         m_focused_sprite_elem = nullptr;
         on_element_changed.invoke(std::nullopt);
         return true;
