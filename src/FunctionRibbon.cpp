@@ -1,21 +1,25 @@
 #include <memory>
 #include <iostream>
+#include <ranges>
 #include <format>
+#include <string>
+#include <vector>
 
 #include "raygui.h"
 
 #include "FunctionRibbon.h"
 #include "Application.h"
 #include "AppLayer.h"
+#include "CanvasLayer.h"
+// #define EDITOR_DEBUG 
+#include "Utils.h"
 
 FunctionRibbon::FunctionRibbon()
 {
     m_buttons = {
-        make_button({ 250, 0, 50, 20 }, "#005#Save", []() {
+        new UIDropDownList({ 250, 0, 50, 20 }, "#005#Open"),
+        make_button({ 100, 0, 50, 20 }, "#005#Save", []() {
             std::cout << "Current loaded save" << std::endl;
-        }),
-        make_button({ 100, 0, 50, 20 }, "#005#Open", []() {
-            std::cout << "Open button clicked!" << std::endl;
         }),
         make_button({ 0, 0, 50, 20 }, "#006#Load", []() {
             Core::Application::get().get_layer<AppLayer>()->open_project();
@@ -23,57 +27,82 @@ FunctionRibbon::FunctionRibbon()
     };
 }
 
+FunctionRibbon::~FunctionRibbon()
+{
+    for (auto& button : m_buttons)
+    {
+        delete button;
+    }
+}
+
 bool FunctionRibbon::process_input()
 {
     Vector2 mouse_pos = GetMousePosition();
 
+
     for (const auto& button : m_buttons)
     {
-        if (CheckCollisionPointRec(mouse_pos, button.rect))
+        if (button->is_hovered())
         {
+            button->on_hover();
             if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
             {
-                button.on_click();
+                button->on_click();
                 return true;
             }
         }
     }
 
     return CheckCollisionPointRec(mouse_pos, m_rect);
+        
 }
 
-UIElement FunctionRibbon::make_button(const Rectangle &rect, const char *label, const std::function<void()> &on_click)
+UIButton* FunctionRibbon::make_button(
+    const Rectangle &rect,
+    const char *label,
+    const std::function<void()>& on_click
+)
 {
-    return (UIElement){
-        .rect = rect,
-        .on_click = on_click,
-        .render = [rect, label]() {
+    return new UIButton(
+        rect,
+        [rect, label]() {
             GuiLabelButton(rect, label);
-        }
-    };
+        },
+        on_click
+    );
 }
 
 void FunctionRibbon::update_ribbon(const ProjectMetadata& proj_data)
 {
-    constexpr auto scene_label_idx { 0 };
-    constexpr auto proj_label_idx { 1 };
+    auto* scene_label = dynamic_cast<UIDropDownList*>(m_buttons[0]);
+    auto& proj_label = m_buttons[1];
 
-    m_buttons[proj_label_idx].render =
-        [rect = m_buttons[proj_label_idx].rect, proj_name = proj_data.project_name]() {
+    proj_label->render =
+        [rect = proj_label->rect, proj_name = proj_data.project_name]() {
             GuiLabelButton(rect, std::format("Project: {}", proj_name).c_str());
     };
 
-    m_buttons[scene_label_idx].render =
-        [rect = m_buttons[scene_label_idx].rect, scene_name = proj_data.active_scene_name.c_str()]() {
-            GuiLabelButton(rect, scene_name);
-    };
+    const auto& active_scene = proj_data.scene_list[proj_data.active_scene_idx];
+    scene_label->set_header(active_scene);
+
+    auto other_scenes = proj_data.scene_list;
+    const auto it = std::ranges::find(other_scenes, active_scene);
+    other_scenes.erase(it);
+
+    scene_label->clear_items();
+    for (auto& item : other_scenes)
+    {
+        scene_label->add_item(item, [this, scene_name = item]() {
+            Core::Application::get().get_layer<AppLayer>()->load_scene(scene_name);
+        });
+    }
 }
 
 void FunctionRibbon::render()
 {
     for (const auto& button : m_buttons)
     {
-        button.render();
+        button->render();
     }
 }
 

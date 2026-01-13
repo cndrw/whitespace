@@ -2,6 +2,8 @@
 #include <format>
 #include <fstream>
 
+#include "Application.h"
+#include "AppLayer.h"
 #include "DataPersistanceLayer.h"
 
 void DataPersitanceLayer::set_saves_root(std::filesystem::path root)
@@ -11,7 +13,9 @@ void DataPersitanceLayer::set_saves_root(std::filesystem::path root)
 
 void DataPersitanceLayer::save_scene(const YAML::Node &scene)
 {
-    const auto dest_path = m_root / "scene.yaml";
+
+    auto scene_name = Core::Application::get().get_layer<AppLayer>()->get_cur_scene_name();
+    const auto dest_path = m_root / (scene_name += ".yaml");
     std::ofstream fout(dest_path);
     fout << scene;
     std::cout << std::format("Saved in: {}\n", dest_path.string());

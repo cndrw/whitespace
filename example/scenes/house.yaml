@@ -1,0 +1,16 @@
+SpriteElements:
+  heart_2:
+    x: 768
+    y: 80
+    layer: 0
+    asset_id: 1
+  heart_3:
+    x: 528
+    y: 80
+    layer: 0
+    asset_id: 1
+  heart_1:
+    x: 160
+    y: -32
+    layer: 0
+    asset_id: 1

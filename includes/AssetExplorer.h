@@ -17,8 +17,8 @@ public:
     void set_rect(const Rectangle rect);
     void set_root_dir(const std::filesystem::path& root);
     void build_explorer_view(const std::filesystem::path& root);
-    UIElement make_dir_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
-    UIElement make_asset_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
+    UIButton make_dir_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
+    UIButton make_asset_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
     void render();
     bool process_input();
     Rectangle get_rect() const { return m_window_rect; }
@@ -37,5 +37,5 @@ private:
     std::filesystem::path m_root;
     std::filesystem::path m_current_directory;
     Rectangle m_window_rect;    
-    std::vector<UIElement> m_asset_prevs; 
+    std::vector<UIButton> m_asset_prevs; 
 };

@@ -147,7 +147,7 @@ void CanvasLayer::render()
     if (m_focused_sprite_elem)
     {
         DrawRectangleLinesEx(
-            m_focused_sprite_elem->rect(),
+            transform_to_screen(m_focused_sprite_elem->rect()),
             1,
             MAGENTA
         );
@@ -222,6 +222,9 @@ void CanvasLayer::save_scene()
 
 void CanvasLayer::load_scene(const std::string& scene_name)
 {
+    // clear current canvas
+    m_sprite_elements.clear();
+
     auto& app = Core::Application::get();
     const auto scene = app.get_layer<DataPersitanceLayer>()->load_scene(scene_name);
 
@@ -243,7 +246,7 @@ void CanvasLayer::load_scene(const std::string& scene_name)
         sprite_element->layer = 0;
 
         m_sprite_elements[0].push_back(sprite_element);
-        m_focused_sprite_elem = m_sprite_elements[0].back();
+        // m_focused_sprite_elem = m_sprite_elements[0].back();
     }
 }
 
@@ -295,6 +298,7 @@ bool CanvasLayer::process_input()
 
         if (IsKeyDown(KEY_SPACE) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
         {
+            std::cout << "2\n";
             const Vector2 delta_pos = GetMouseDelta();
             m_origin.x += delta_pos.x;
             m_origin.y += delta_pos.y;

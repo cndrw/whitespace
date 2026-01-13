@@ -8,38 +8,38 @@
 #include "AssetExplorer.h"
 #include "Utils.h"
 
-UIElement AssetExplorer::make_dir_preview(
+UIButton AssetExplorer::make_dir_preview(
     const Rectangle& rect, const std::filesystem::path& dir, float preview_size
 )
 {
-    return (UIElement) {
-        .rect = rect,
-        .on_click = [this, dir] {
-            open_asset_directory(dir);
-        },
-        .render = [this, rect, preview_size, name = dir.filename().string()] {
+    return UIButton(
+        rect,
+        [this, rect, preview_size, name = dir.filename().string()]() {
             GuiButton(rect, GuiIconText(ICON_FOLDER, ""));
             draw_asset_label(rect, name.c_str(), preview_size);
+        },
+        [this, dir]() {
+            open_asset_directory(dir);
         }
-    };
+    );
 }
 
-UIElement AssetExplorer::make_asset_preview(
+UIButton AssetExplorer::make_asset_preview(
     const Rectangle& rect, const std::filesystem::path& file, float preview_size
 )
 {
-    return (UIElement) {
-        .rect = rect,
-        .on_click = [this, file] {
+    return UIButton(
+        rect,
+        [this, rect, preview_size, name = file.filename().string()]() {
+            GuiButton(rect, GuiIconText(ICON_FILE, ""));
+            draw_asset_label(rect, name.c_str(), preview_size);
+        },
+        [this, file]() {
             auto* const am = Core::Application::get().get_asset_manager();
             add_scene_element.invoke(am->get_asset(m_assets[file]));
             on_asset_prev_clicked.invoke(am->get_asset(m_assets[file]));
-        },
-        .render = [this, rect, preview_size, name = file.filename().string()] {
-            GuiButton(rect, GuiIconText(ICON_FILE, ""));
-            draw_asset_label(rect, name.c_str(), preview_size);
         }
-    };
+    );
 }
 
 void AssetExplorer::set_root_dir(const std::filesystem::path& root)

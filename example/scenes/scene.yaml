@@ -1,11 +1,16 @@
 SpriteElements:
   smiley_1:
-    x: 320
-    y: 160
+    x: 416
+    y: 208
     layer: 0
     asset_id: 2
-  heart_1:
-    x: 624
-    y: 176
+  heart_3:
+    x: 544
+    y: 112
+    layer: 0
+    asset_id: 1
+  heart_4:
+    x: 320
+    y: 112
     layer: 0
     asset_id: 1

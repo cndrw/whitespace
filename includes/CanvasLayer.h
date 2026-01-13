@@ -23,6 +23,7 @@ public:
     virtual void render() override;
     virtual bool process_input() override;
     virtual ~CanvasLayer();
+    void save_scene();
     void load_scene(const std::string& scene_name);
     Core::Event<const std::optional<SpriteElement>&> on_element_changed;
 
@@ -33,7 +34,6 @@ private:
     void add_scene_element(const Core::Asset& asset);
     void remove_scene_element(const std::shared_ptr<SpriteElement>& element);
     std::string resolve_naming(const std::filesystem::path& path) const;
-    void save_scene();
 
     // tmp functions
     Rectangle transform_to_screen(const Rectangle& rect);
