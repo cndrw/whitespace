@@ -16,6 +16,7 @@
 #include "DataPersistanceLayer.h"
 #include "SceneElement.h"
 #include "Event.h"
+#include "Utils.h"
 
 static constexpr auto SCROLL_SPEED { 0.05f };
 
@@ -224,6 +225,7 @@ void CanvasLayer::load_scene(const std::string& scene_name)
 {
     // clear current canvas
     m_sprite_elements.clear();
+    m_focused_sprite_elem = nullptr;
 
     auto& app = Core::Application::get();
     const auto scene = app.get_layer<DataPersitanceLayer>()->load_scene(scene_name);
@@ -246,7 +248,6 @@ void CanvasLayer::load_scene(const std::string& scene_name)
         sprite_element->layer = 0;
 
         m_sprite_elements[0].push_back(sprite_element);
-        // m_focused_sprite_elem = m_sprite_elements[0].back();
     }
 }
 
@@ -275,8 +276,8 @@ CanvasLayer::~CanvasLayer()
 
 bool CanvasLayer::process_input()
 {
-    const Vector2 cursor_pos = GetMousePosition();
-    const Vector2 wheel_move = GetMouseWheelMoveV();
+    const Vec2 cursor_pos = GetMousePosition();
+    const Vec2 wheel_move = GetMouseWheelMoveV();
 
     if (IsKeyDown(KeyboardKey::KEY_LEFT_CONTROL) && IsKeyPressed(KeyboardKey::KEY_S))
     {

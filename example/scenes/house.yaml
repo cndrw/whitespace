@@ -4,13 +4,13 @@ SpriteElements:
     y: 80
     layer: 0
     asset_id: 1
-  heart_3:
-    x: 528
+  heart_1:
+    x: 288
     y: 80
     layer: 0
     asset_id: 1
-  heart_1:
-    x: 160
-    y: -32
+  heart_3:
+    x: 528
+    y: 112
     layer: 0
     asset_id: 1

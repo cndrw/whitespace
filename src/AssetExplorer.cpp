@@ -6,11 +6,13 @@
 
 #include "Application.h"
 #include "AssetExplorer.h"
+// #define EDITOR_DEBUG
 #include "Utils.h"
 
+constexpr auto margin_top { 50 };
+
 UIButton AssetExplorer::make_dir_preview(
-    const Rectangle& rect, const std::filesystem::path& dir, float preview_size
-)
+    const Rectangle& rect, const std::filesystem::path& dir, float preview_size)
 {
     return UIButton(
         rect,
@@ -25,8 +27,7 @@ UIButton AssetExplorer::make_dir_preview(
 }
 
 UIButton AssetExplorer::make_asset_preview(
-    const Rectangle& rect, const std::filesystem::path& file, float preview_size
-)
+    const Rectangle& rect, const std::filesystem::path& file, float preview_size)
 {
     return UIButton(
         rect,
@@ -97,6 +98,17 @@ void AssetExplorer::render()
     {
         prev.render();
     }
+
+    // should be in update (or even better on event basis)
+    std::filesystem::path trace = m_current_directory;
+    std::vector<std::filesystem::path> path_parts{ trace };
+    while (trace.has_parent_path() && trace != m_root)
+    {
+        path_parts.push_back(trace.parent_path());
+        trace = trace.parent_path();
+    }
+
+    draw_path_trace(path_parts);
 }
 
 bool AssetExplorer::process_input()
@@ -119,7 +131,7 @@ Rectangle AssetExplorer::place_preview_rect(int idx, float preview_size, float p
 {
     return {
         .x = m_window_rect.x + (idx * (preview_size + padding) + 10),
-        .y = m_window_rect.y + 10,
+        .y = m_window_rect.y + margin_top,
         .width = preview_size,
         .height = preview_size
     };
@@ -139,6 +151,48 @@ void AssetExplorer::draw_asset_label(
     // DRAW_DEBUG_RECTANGLE(label_rect, BLUE);      
     GuiLabel(label_rect, text);
 }
+
+void AssetExplorer::draw_path_trace(std::span<const std::filesystem::path> path_parts) const
+{
+    // constexpr float label_width = 100;
+    float label_width = 100;
+    float x_offset = 10;
+    float label_spacing = 15;
+
+    // TODO: reversing should be not part of this function
+    for (const auto& part : path_parts | std::views::reverse)
+    {
+        // draw parts as label buttons
+        const char* text = part.stem().string().c_str();
+        label_width = MeasureTextEx(GuiGetFont(), text, GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
+
+        Rectangle rect = {
+            .x = m_window_rect.x + 10 + (x_offset),
+            .y = m_window_rect.y + 20,
+            .width = label_width,
+            .height = 20
+        };
+
+        DRAW_DEBUG_RECTANGLE(rect, GREEN);
+        GuiLabelButton(rect, text );
+
+        x_offset += label_width + label_spacing;
+
+        if (part != path_parts.front())
+        {
+            // draw separator
+            Rectangle rect = {
+                .x = m_window_rect.x + 10 + (x_offset - label_spacing) + 4,
+                .y = m_window_rect.y + 20,
+                .width = label_spacing,
+                .height = 20
+            };
+            DRAW_DEBUG_RECTANGLE(rect, RED);
+            GuiLabel(rect, ">"); // apparently this style (font?) cannot display ">" correctly
+        }
+    }
+}
+
 
 void AssetExplorer::open_asset_directory(std::filesystem::path dir)
 {

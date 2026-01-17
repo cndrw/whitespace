@@ -20,5 +20,7 @@ public:
 
 private:
     Rectangle m_rect;
+    Rectangle m_scene_static_label;
     std::vector<UIButton*> m_buttons; 
+    std::vector<UIElement*> m_labels;
 };

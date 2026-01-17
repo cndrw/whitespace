@@ -8,6 +8,7 @@
 #include "raylib.h"
 #include "raygui.h"
 
+
 bool UIButton::is_hovered()
 {
     return CheckCollisionPointRec(GetMousePosition(), rect);
@@ -15,53 +16,60 @@ bool UIButton::is_hovered()
 
 UIDropDownList::UIDropDownList(
     const Rectangle& rect_p,
-    const std::string& header,
-    const std::vector<std::string>& items)
+    const std::string& header)
     : UIButton(rect_p, [](){}, [](){}), m_header(header)
 {
-    render = [this]() {
-        if (m_state == State::CLOSED)
-        {
-            GuiLabelButton(rect, m_header.c_str());
-        }
-        else
-        {
-            const Rectangle scene_list_rect = {
-                rect.x,
-                rect.y + rect.height,
-                rect.width,
-                rect.height * m_items.size()
-            };
-            DrawRectangleRec(scene_list_rect, LIGHTGRAY); 
-            GuiLabelButton(rect, m_header.c_str());
-            for (const auto& item : m_items)
-            {
-                item->render();
-            }
-        }
-    };
-
-    on_click = [this]() {
-        if (m_header_hovered)
-        {
-            m_state = (m_state == State::CLOSED) ? State::OPENED : State::CLOSED;
-            return;
-        }
-        for (const auto& item : m_items)
-        {
-            if (item->is_hovered())
-            {
-                item->on_click();
-                m_state = State::CLOSED;
-                return;
-            }
-        }
-
-        m_state = State::CLOSED;
-    };
+    render = [this]() { this->render_impl(); };
+    on_click = [this]() { this->on_click_impl(); };
 }
 
-void UIDropDownList::add_item(const std::string& item, Callback on_click)
+void UIDropDownList::render_impl()
+{
+    if (m_state == State::CLOSED)
+    {
+        GuiLabelButton(rect, m_header.c_str());
+    }
+    else
+    {
+        const Rectangle scene_list_rect = {
+            rect.x,
+            rect.y + rect.height,
+            rect.width,
+            rect.height * m_items.size()
+        };
+
+        DrawRectangleRec(scene_list_rect, LIGHTGRAY); 
+        GuiLabelButton(rect, m_header.c_str());
+
+        for (const auto& item : m_items)
+        {
+            item->render();
+        }
+    }
+}
+
+void UIDropDownList::on_click_impl()
+{
+    if (m_header_hovered)
+    {
+        m_state = (m_state == State::CLOSED) ? State::OPENED : State::CLOSED;
+        return;
+    }
+
+    for (const auto& item : m_items)
+    {
+        if (item->is_hovered())
+        {
+            item->on_click();
+            m_state = State::CLOSED;
+            return;
+        }
+    }
+
+    m_state = State::CLOSED;
+}
+
+void UIDropDownList::add_item(const std::string &item, Callback on_click)
 {
     m_items.push_back(
         std::make_unique<UIButton>(
@@ -91,6 +99,7 @@ bool UIDropDownList::is_hovered()
 {
     Vector2 mouse_pos = GetMousePosition();
     m_header_hovered = false;
+
     if (m_state == State::CLOSED)
     {
         m_header_hovered = CheckCollisionPointRec(mouse_pos, rect);
