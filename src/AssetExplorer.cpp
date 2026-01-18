@@ -43,11 +43,17 @@ UIButton AssetExplorer::make_asset_preview(
     );
 }
 
+void AssetExplorer::set_rect(const Rectangle rect)
+{
+    m_window_rect = rect;
+}
+
+// TODO: kann man den root_dir nicht mit im constructor setzen? sollte da schon bekannt sein
+//       dann kann open_asset_directory im constructor/init aufgerufen werden
 void AssetExplorer::set_root_dir(const std::filesystem::path& root)
 {
     m_root = root;
-    m_current_directory = root;
-    build_explorer_view(m_current_directory);
+    open_asset_directory(root);
 }
 
 void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
@@ -80,11 +86,6 @@ void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
     }
 }
 
-void AssetExplorer::set_rect(const Rectangle rect)
-{
-    m_window_rect = rect;
-}
-
 void AssetExplorer::render()
 {
     GuiGroupBox(m_window_rect, "AssetExplorer");
@@ -99,27 +100,30 @@ void AssetExplorer::render()
         prev.render();
     }
 
-    // should be in update (or even better on event basis)
-    std::filesystem::path trace = m_current_directory;
-    std::vector<std::filesystem::path> path_parts{ trace };
-    while (trace.has_parent_path() && trace != m_root)
-    {
-        path_parts.push_back(trace.parent_path());
-        trace = trace.parent_path();
-    }
 
-    draw_path_trace(path_parts);
+    // draw_path_trace(m_path_trace);
+    draw_path_trace();
 }
 
 bool AssetExplorer::process_input()
 {
-    const Vector2 mpos = GetMousePosition();
+    const Vec2 mpos = GetMousePosition();
+    const bool left_clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
     for (const auto& prev : m_asset_prevs)
     {
-        if (CheckCollisionPointRec(mpos, prev.rect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        if (CheckCollisionPointRec(mpos, prev.rect) && left_clicked)
         {
             prev.on_click();
+            return true;
+        }
+    }
+
+    for (const auto& label : m_ptrace_labels)
+    {
+        if (CheckCollisionPointRec(mpos, label->rect) && left_clicked)
+        {
+            label->on_click();
             return true;
         }
     }
@@ -138,8 +142,7 @@ Rectangle AssetExplorer::place_preview_rect(int idx, float preview_size, float p
 }
 
 void AssetExplorer::draw_asset_label(
-    const Rectangle& preview_rect, const char* text, const float preview_size
-) const
+    const Rectangle& preview_rect, const char* text, const float preview_size) const
 {
     const Rectangle label_rect = {
         .x = preview_rect.x,
@@ -152,19 +155,18 @@ void AssetExplorer::draw_asset_label(
     GuiLabel(label_rect, text);
 }
 
-void AssetExplorer::draw_path_trace(std::span<const std::filesystem::path> path_parts) const
+void AssetExplorer::draw_path_trace()
 {
-    // constexpr float label_width = 100;
+    constexpr float label_spacing = 15;
     float label_width = 100;
     float x_offset = 10;
-    float label_spacing = 15;
 
-    // TODO: reversing should be not part of this function
-    for (const auto& part : path_parts | std::views::reverse)
+    auto& labels = m_ptrace_labels;
+    for (size_t i = 0; i < labels.size(); i++)
     {
         // draw parts as label buttons
-        const char* text = part.stem().string().c_str();
-        label_width = MeasureTextEx(GuiGetFont(), text, GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
+        std::string text = labels[i]->text;
+        label_width = MeasureTextEx(GuiGetFont(), text.c_str(), GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
 
         Rectangle rect = {
             .x = m_window_rect.x + 10 + (x_offset),
@@ -173,12 +175,14 @@ void AssetExplorer::draw_path_trace(std::span<const std::filesystem::path> path_
             .height = 20
         };
 
+        labels[i]->rect = rect;
+
         DRAW_DEBUG_RECTANGLE(rect, GREEN);
-        GuiLabelButton(rect, text );
+        labels[i]->render();
 
         x_offset += label_width + label_spacing;
 
-        if (part != path_parts.front())
+        if (i != labels.size() - 1)
         {
             // draw separator
             Rectangle rect = {
@@ -193,9 +197,33 @@ void AssetExplorer::draw_path_trace(std::span<const std::filesystem::path> path_
     }
 }
 
+UIButton* AssetExplorer::make_path_trace_label(const std::filesystem::path& path)
+{
+    return new UIButton(
+        Rectangle{},
+        [this, path]() {
+            if (path == m_current_directory) return;
+            open_asset_directory(path);
+        },
+        path.stem().string()
+    );
+}
 
 void AssetExplorer::open_asset_directory(std::filesystem::path dir)
 {
     m_current_directory = dir;
     build_explorer_view(m_current_directory);
+
+    // update path trace
+    std::filesystem::path trace = m_current_directory;
+    m_ptrace_labels.clear();
+    m_ptrace_labels.push_back(make_path_trace_label(trace));
+
+    while (trace != m_root && trace.has_parent_path())
+    {
+        trace = trace.parent_path();
+        m_ptrace_labels.push_back(make_path_trace_label(trace));
+    }
+
+    std::ranges::reverse(m_ptrace_labels);
 }

@@ -7,8 +7,8 @@
 
 class UIElement
 {
-using Callback = std::function<void()>;
 public:
+    using Callback = std::function<void()>;
     UIElement() = default;
 
     UIElement(const Rectangle& rect)
@@ -28,9 +28,10 @@ public:
 
 class UIButton : public UIElement
 {
-using Callback = std::function<void()>;
 public:
     UIButton() = default;
+
+    UIButton(const Rectangle& rect, Callback on_click, const std::string& text);
 
     UIButton(const Rectangle& rect, Callback render, Callback on_click)
         : UIButton(rect, render, on_click, [](){}) {}
@@ -40,17 +41,19 @@ public:
 
     virtual ~UIButton() = default;
 
-    void render_impl();
     virtual bool is_hovered() override;
+
+private:
+    void render_impl();
 
 public:
     Callback on_click;
     Callback on_hover;
+    std::string text;
 };
 
 class UIDropDownList : public UIButton 
 {
-using Callback = std::function<void()>;
 public:
     UIDropDownList() = default;
 
@@ -58,12 +61,14 @@ public:
 
     virtual ~UIDropDownList() = default;
 
-    void render_impl();
-    void on_click_impl();
     inline void clear_items() { m_items.clear(); }
     void add_item(const std::string& item, Callback on_click);
     inline void set_header(const std::string& header) { m_header = header; }
     virtual bool is_hovered() override;
+
+private:
+    void render_impl();
+    void on_click_impl();
 
 
 private:

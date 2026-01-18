@@ -29,7 +29,8 @@ private:
     UIButton make_asset_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
     Rectangle place_preview_rect(int idx, float preview_size, float padding) const;
     void draw_asset_label(const Rectangle& preview_rect, const char* text, float preview_size) const;
-    void draw_path_trace(std::span<const std::filesystem::path> path_parts) const;
+    UIButton* make_path_trace_label(const std::filesystem::path& text);
+    void draw_path_trace();
     void open_asset_directory(std::filesystem::path dir);
 
 private:
@@ -38,4 +39,5 @@ private:
     std::filesystem::path m_current_directory;
     Rectangle m_window_rect;    
     std::vector<UIButton> m_asset_prevs; 
+    std::vector<UIButton*> m_ptrace_labels;
 };

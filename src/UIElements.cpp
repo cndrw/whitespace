@@ -8,10 +8,21 @@
 #include "raylib.h"
 #include "raygui.h"
 
+UIButton::UIButton(const Rectangle& rect, Callback on_click, const std::string& text)
+    : UIButton(rect, [](){}, on_click)
+{
+    this->text = text;
+    render = [this]() { this->render_impl(); };
+}
 
 bool UIButton::is_hovered()
 {
     return CheckCollisionPointRec(GetMousePosition(), rect);
+}
+
+void UIButton::render_impl()
+{
+    GuiLabelButton(rect, text.c_str());
 }
 
 UIDropDownList::UIDropDownList(
