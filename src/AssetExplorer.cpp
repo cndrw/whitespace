@@ -12,7 +12,7 @@
 constexpr auto margin_top { 50 };
 
 UIButton AssetExplorer::make_dir_preview(
-    const Rectangle& rect, const std::filesystem::path& dir, float preview_size)
+    const Rectangle& rect, const std::filesystem::path& dir, const float preview_size)
 {
     return UIButton(
         rect,
@@ -27,7 +27,7 @@ UIButton AssetExplorer::make_dir_preview(
 }
 
 UIButton AssetExplorer::make_asset_preview(
-    const Rectangle& rect, const std::filesystem::path& file, float preview_size)
+    const Rectangle& rect, const std::filesystem::path& file, const float preview_size)
 {
     return UIButton(
         rect,
@@ -66,10 +66,6 @@ void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
 
     auto* am = Core::Application::get().get_asset_manager();
 
-    m_asset_prevs.push_back(
-        make_dir_preview(place_preview_rect(idx++, preview_size, padding), dir.parent_path(), preview_size)
-    );
-
     for (const auto& entry : std::filesystem::directory_iterator(dir))
     {
         const auto rect = place_preview_rect(idx++, preview_size, padding);
@@ -100,8 +96,6 @@ void AssetExplorer::render()
         prev.render();
     }
 
-
-    // draw_path_trace(m_path_trace);
     draw_path_trace();
 }
 
@@ -128,7 +122,7 @@ bool AssetExplorer::process_input()
         }
     }
 
-    return false;
+    return CheckCollisionPointRec(mpos, m_window_rect);
 }
 
 Rectangle AssetExplorer::place_preview_rect(int idx, float preview_size, float padding) const
@@ -197,9 +191,9 @@ void AssetExplorer::draw_path_trace()
     }
 }
 
-UIButton* AssetExplorer::make_path_trace_label(const std::filesystem::path& path)
+std::unique_ptr<UIButton> AssetExplorer::make_path_trace_label(const std::filesystem::path& path)
 {
-    return new UIButton(
+    return std::make_unique<UIButton>(
         Rectangle{},
         [this, path]() {
             if (path == m_current_directory) return;

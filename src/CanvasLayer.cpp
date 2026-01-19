@@ -295,7 +295,10 @@ bool CanvasLayer::process_input()
 
     if (!m_focused_sprite_elem)
     {
-        on_element_changed.invoke(std::nullopt);
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            on_element_changed.invoke(std::nullopt);
+        }
 
         if (IsKeyDown(KEY_SPACE) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
         {

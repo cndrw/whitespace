@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <unordered_map>
+#include <memory>
 #include <vector>
 
 #include "raylib.h"
@@ -27,11 +28,11 @@ private:
     void build_explorer_view(const std::filesystem::path& root);
     UIButton make_dir_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
     UIButton make_asset_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
+    std::unique_ptr<UIButton> make_path_trace_label(const std::filesystem::path& text);
+    void open_asset_directory(std::filesystem::path dir);
     Rectangle place_preview_rect(int idx, float preview_size, float padding) const;
     void draw_asset_label(const Rectangle& preview_rect, const char* text, float preview_size) const;
-    UIButton* make_path_trace_label(const std::filesystem::path& text);
     void draw_path_trace();
-    void open_asset_directory(std::filesystem::path dir);
 
 private:
     std::unordered_map<std::filesystem::path, uint32_t> m_assets;
@@ -39,5 +40,5 @@ private:
     std::filesystem::path m_current_directory;
     Rectangle m_window_rect;    
     std::vector<UIButton> m_asset_prevs; 
-    std::vector<UIButton*> m_ptrace_labels;
+    std::vector<std::unique_ptr<UIButton>> m_ptrace_labels;
 };

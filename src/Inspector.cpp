@@ -5,6 +5,7 @@
 
 #include "Inspector.h"
 #include "SceneElement.h"
+// #define EDITOR_DEBUG
 #include "Utils.h"
 
 Inspector::Inspector()
@@ -51,6 +52,21 @@ void Inspector::draw_asset_element_content() const
 {
     draw_label({10, 10}, std::format("Name: {}", m_focused_asset.path.stem().string().c_str()));
     draw_label({10, 30}, std::format("PPU: {}", m_focused_asset.ppu));
+
+    const float width = m_rect.width - 20.0f;
+    const Vec2 pos = { m_rect.x + 10.0f, m_rect.y + m_rect.height - width - 10.0f };
+    const Rectangle asset_rect = { pos.x, pos.y, width, width };
+
+
+    DRAW_DEBUG_RECTANGLE(asset_rect, MAGENTA);
+    DrawTexturePro(
+        m_focused_asset.texture,
+        { 0.0f, 0.0f, (float)m_focused_asset.texture.width, (float)m_focused_asset.texture.height },
+        asset_rect,
+        { 0.0f, 0.0f },
+        0.0f,
+        WHITE
+    );
 }
 
 void Inspector::set_rect(const Rectangle rect)
