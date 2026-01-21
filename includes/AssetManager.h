@@ -2,9 +2,12 @@
 
 #include <unordered_map>
 #include <filesystem>
+#include <string>
 #include <memory>
 
 #include "raylib.h"
+
+using Handle = std::string;
 
 namespace Core
 {
@@ -12,16 +15,17 @@ namespace Core
         std::filesystem::path path;
         Texture2D texture;
         uint32_t ppu;
-        uint32_t id;
     } Asset;
 
     class AssetManager
     {
     public:
-        uint32_t add_asset(const std::filesystem::path& path);
-        Asset get_asset(const uint32_t id);
+        void add_asset(const std::filesystem::path& path);
+        Asset get_asset(const Handle& handle) const;
+        bool exists(const Handle& handle) const;
+
     private:
-        std::unordered_map<uint32_t, Asset> m_assets;
+        std::unordered_map<Handle, Asset> m_assets;
         uint32_t m_current_id = 0;
     };
 }

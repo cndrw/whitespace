@@ -33,6 +33,9 @@ public:
 
     UIButton(const Rectangle& rect, Callback on_click, const std::string& text);
 
+    UIButton(const Rectangle& rect, Callback on_click)
+        : UIButton(rect, [](){}, on_click) {}
+
     UIButton(const Rectangle& rect, Callback render, Callback on_click)
         : UIButton(rect, render, on_click, [](){}) {}
 
@@ -44,12 +47,28 @@ public:
     virtual bool is_hovered() override;
 
 private:
-    void render_impl();
+    virtual void render_impl();
 
 public:
     Callback on_click;
     Callback on_hover;
     std::string text;
+};
+
+class UIImageButton : public UIButton
+{
+public:
+    UIImageButton() = default;
+
+    UIImageButton(const Rectangle& rect, Texture2D texture, Callback on_click);
+
+    virtual ~UIImageButton() = default;
+
+private:
+    virtual void render_impl() override;
+
+public:
+    Texture2D texture;
 };
 
 class UIDropDownList : public UIButton 

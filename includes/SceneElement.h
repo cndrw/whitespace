@@ -16,13 +16,15 @@ public:
 class SpriteElement : public SceneElement
 {
 public:
+    using Handle = std::string;
+    Handle handle;
+
+    Texture2D texture;
     float width;
     float height;
     float angle;
-    Texture2D texture;
-    uint8_t layer = 0;
     int ppu;
-    int asset_id;
+    uint8_t layer = 0;
 
     inline Rectangle rect() const
     {

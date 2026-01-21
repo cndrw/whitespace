@@ -10,11 +10,13 @@
 #include "Event.h"
 #include "AssetManager.h"
 #include "UIElements.h"
+#include "Utils.h"
 
 
 class AssetExplorer
 {
 public:
+    using AssetPreview = std::pair<UIImageButton, std::string>;
     void set_rect(const Rectangle rect);
     void set_root_dir(const std::filesystem::path& root);
     void render();
@@ -29,13 +31,16 @@ private:
     UIButton make_dir_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
     UIButton make_asset_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
     std::unique_ptr<UIButton> make_path_trace_label(const std::filesystem::path& text);
+    // std::shared_ptr<AssetPreview> make_asset_prev(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
+
     void open_asset_directory(std::filesystem::path dir);
     Rectangle place_preview_rect(int idx, float preview_size, float padding) const;
     void draw_asset_label(const Rectangle& preview_rect, const char* text, float preview_size) const;
     void draw_path_trace();
+    void draw_asset_preview(const UIImageButton* const btn, const std::string& label, Vec2 pos, float size) const;
 
 private:
-    std::unordered_map<std::filesystem::path, uint32_t> m_assets;
+    // std::unordered_map<std::filesystem::path, uint32_t> m_assets;
     std::filesystem::path m_root;
     std::filesystem::path m_current_directory;
     Rectangle m_window_rect;    

@@ -6,21 +6,22 @@
 
 namespace Core
 {
-    uint32_t AssetManager::add_asset(const std::filesystem::path& path)
+    void AssetManager::add_asset(const std::filesystem::path& path)
     {
-        m_current_id++;
-        m_assets[m_current_id] = (Asset) {
+        m_assets[path.stem().string()] = (Asset) {
             .path = path,
             .texture = LoadTexture(path.string().c_str()),
-            .ppu = 32, // TODO: set default back to 100
-            .id = m_current_id
+            .ppu = 32 // TODO: set default back to 100
         };
-
-        return m_current_id;
     }
 
-    Asset AssetManager::get_asset(const uint32_t id)
+    Asset AssetManager::get_asset(const Handle& handle) const
     {
-        return m_assets.at(id);
+        return m_assets.at(handle);
+    }
+
+    bool AssetManager::exists(const Handle &handle) const
+    {
+        return m_assets.contains(handle);
     }
 }

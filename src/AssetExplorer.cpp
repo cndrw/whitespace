@@ -35,13 +35,28 @@ UIButton AssetExplorer::make_asset_preview(
             GuiButton(rect, GuiIconText(ICON_FILE, ""));
             draw_asset_label(rect, name.c_str(), preview_size);
         },
-        [this, file]() {
+        [this, name = file.stem().string()]() {
             auto* const am = Core::Application::get().get_asset_manager();
-            add_scene_element.invoke(am->get_asset(m_assets[file]));
-            on_asset_prev_clicked.invoke(am->get_asset(m_assets[file]));
+            add_scene_element.invoke(am->get_asset(name));
+            on_asset_prev_clicked.invoke(am->get_asset(name));
         }
     );
 }
+
+// std::shared_ptr<AssetPreview> AssetExplorer::make_asset_prev(
+//     const Rectangle& rect, const std::filesystem::path& file, const float preview_size)
+// {
+//     const auto* am = Core::Application::get().get_asset_manager();
+//     return std::make_shared<AssetPreview>({
+//         rect,
+//         am->get_asset(file.stem().string()),
+//         [this, name = file.stem().string(), am]() {
+//             add_scene_element.invoke(am->get_asset(name));
+//             on_asset_prev_clicked.invoke(am->get_asset(name));
+//         }},
+//         file.stem().string()
+//     );
+// }
 
 void AssetExplorer::set_rect(const Rectangle rect)
 {
@@ -76,7 +91,12 @@ void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
         }
         else
         {
-            m_assets.try_emplace(entry, am->add_asset(entry));
+            const auto path = entry.path();
+            if (!am->exists(path.stem().string()))
+            {
+                am->add_asset(path);
+            }
+            
             m_asset_prevs.push_back(make_asset_preview(rect, entry, preview_size));
         }
     }
@@ -202,6 +222,7 @@ std::unique_ptr<UIButton> AssetExplorer::make_path_trace_label(const std::filesy
         path.stem().string()
     );
 }
+
 
 void AssetExplorer::open_asset_directory(std::filesystem::path dir)
 {

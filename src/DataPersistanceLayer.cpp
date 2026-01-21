@@ -23,6 +23,7 @@ void DataPersitanceLayer::save_scene(const YAML::Node &scene)
 
 YAML::Node DataPersitanceLayer::load_scene(const std::filesystem::path& file)
 {
+    // TODO: das ist nur temporär
     std::cout << std::format("Try Load File: {}\n", (m_root / file).string());
     return YAML::LoadFile((m_root / file).string());
 }

@@ -65,7 +65,7 @@ void CanvasLayer::add_scene_element(const Core::Asset& asset)
     sprite_element->ppu = ppu;
     sprite_element->width = sprite_element->texture.width * ppu;
     sprite_element->height = sprite_element->texture.height * ppu;
-    sprite_element->asset_id = asset.id;
+    sprite_element->handle = asset.path.stem().string();
     sprite_element->layer = 0;
 
     m_sprite_elements[0].push_back(sprite_element);
@@ -213,8 +213,8 @@ void CanvasLayer::save_scene()
             scene["SpriteElements"][element->name]["x"] = element->pos.x;
             scene["SpriteElements"][element->name]["y"] = element->pos.y;
             scene["SpriteElements"][element->name]["layer"] = static_cast<int>(element->layer);
-            scene["SpriteElements"][element->name]["asset_id"] = element->asset_id;
-            std::cout << std::format("Save with id: {}\n", element->asset_id);
+            scene["SpriteElements"][element->name]["asset_ref"] = element->handle;
+            std::cout << std::format("Save with asset_ref: {}\n", element->handle);
         }
     }
 
@@ -228,7 +228,9 @@ void CanvasLayer::load_scene(const std::string& scene_name)
     m_focused_sprite_elem = nullptr;
 
     auto& app = Core::Application::get();
+    std::cout << "before\n";
     const auto scene = app.get_layer<DataPersitanceLayer>()->load_scene(scene_name);
+    std::cout << "after\n";
 
     auto* const am = app.get_asset_manager();
     for (const auto& it : scene["SpriteElements"])
@@ -239,8 +241,9 @@ void CanvasLayer::load_scene(const std::string& scene_name)
         auto sprite_element = std::make_shared<SpriteElement>();
         sprite_element->name = name;
         sprite_element->pos = { (float)it.second["x"].as<int>(), (float)it.second["y"].as<int>() };
-        Core::Asset asset = am->get_asset(it.second["asset_id"].as<uint32_t>());
-        sprite_element->asset_id = asset.id;
+        Handle handle = it.second["asset_ref"].as<std::string>();
+        Core::Asset asset = am->get_asset(handle);
+        sprite_element->handle = handle; 
         sprite_element->texture = asset.texture;
         sprite_element->ppu = ppu;
         sprite_element->width = sprite_element->texture.width * ppu;

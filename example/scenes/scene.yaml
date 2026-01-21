@@ -3,14 +3,14 @@ SpriteElements:
     x: 416
     y: 208
     layer: 0
-    asset_id: 2
+    asset_ref: smiley
   heart_3:
     x: 544
     y: 112
     layer: 0
-    asset_id: 1
+    asset_ref: heart
   heart_4:
     x: 320
     y: 112
     layer: 0
-    asset_id: 1
+    asset_ref: heart

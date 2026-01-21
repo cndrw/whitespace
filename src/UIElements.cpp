@@ -9,7 +9,7 @@
 #include "raygui.h"
 
 UIButton::UIButton(const Rectangle& rect, Callback on_click, const std::string& text)
-    : UIButton(rect, [](){}, on_click)
+    : UIButton(rect, on_click)
 {
     this->text = text;
     render = [this]() { this->render_impl(); };
@@ -23,6 +23,24 @@ bool UIButton::is_hovered()
 void UIButton::render_impl()
 {
     GuiLabelButton(rect, text.c_str());
+}
+
+UIImageButton::UIImageButton(const Rectangle& rect, Texture2D texture, Callback on_click)
+    : UIButton(rect, on_click), texture(texture)
+{
+    render = [this]() { this->render_impl(); };
+}
+
+void UIImageButton::render_impl()
+{
+    DrawTexturePro(
+        texture,
+        Rectangle { 0, 0, static_cast<float>(texture.width), static_cast<float>(texture.height) },
+        rect,
+        Vector2 { 0, 0 },
+        0.0f,
+        WHITE
+    );
 }
 
 UIDropDownList::UIDropDownList(
@@ -139,3 +157,4 @@ bool UIDropDownList::is_hovered()
         return false;
     }
 }
+
