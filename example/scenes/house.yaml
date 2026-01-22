@@ -11,6 +11,6 @@ SpriteElements:
     asset_ref: heart
   heart_3:
     x: 528
-    y: 112
+    y: 80
     layer: 0
     asset_ref: heart

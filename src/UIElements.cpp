@@ -33,6 +33,13 @@ UIImageButton::UIImageButton(const Rectangle& rect, Texture2D texture, Callback 
 
 void UIImageButton::render_impl()
 {
+    if (texture.id == 0)
+    {
+        DrawRectangleRec(rect, MAGENTA);
+        return;
+    }
+
+    DrawRectangleRec(rect, GRAY);
     DrawTexturePro(
         texture,
         Rectangle { 0, 0, static_cast<float>(texture.width), static_cast<float>(texture.height) },
