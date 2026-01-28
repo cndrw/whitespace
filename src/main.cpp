@@ -4,10 +4,6 @@
 #include "AppLayer.h"
 #include "DataPersistanceLayer.h"
 
-#include <filesystem>
-
-#include "yaml-cpp/yaml.h"
-
 int main()
 {
     Core::Application app{};
@@ -21,9 +17,20 @@ int main()
 
 
 /* TODO: 
-- wenn man canvas bewegt dann -> sieht man das die boundingbox vom focused element nicht mit
-    transformiert wird
-- screen move -> ctrl + left click
-- scroll für zoom -> geschwindigkeit anpassen
-- wenn man über scene label im ribbon hovered -> alle scenes für das projekt anzeigen
+- wenn man zoomt -> dragen von elementen nicht mehr identisch mit mausposition
+    -> transformmation fehlt irgendwo noch
+- sollten für die sprite element im canvas layer nicht eher unique_ptr sein, da es die ja owned?
+
+- render() sollte bei uielemente intern bereits codiert sein
+    - (warum sollte man selber bei uibutton den render code jedesmal schreiben?)
+    - wie ist das mit dem fall bei asset explorer (sind auch buttons + mit mehr rendering)
+
+- asset explorer überarbeiten
+    - das "rausdraggen" muss noch richtig implementiert werden
+    - sollte klar sein welches gerade fokusiert ist
+
+- wenn loading von scene fehlschlägt -> fehlerhandling (nicht programm crash)
+
+- eigentlich braucht die handle nicht in der scene gespeichert zu werden, da sowie die pfade gespeichert werden
+
 */

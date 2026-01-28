@@ -29,8 +29,8 @@ public:
 private:
     void build_explorer_view(const std::filesystem::path& root);
     std::unique_ptr<UIButton> make_path_trace_label(const std::filesystem::path& text);
-    AssetPreview make_asset_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
-    AssetPreview make_dir_preview(const Rectangle& rect, const std::filesystem::path& dir, float preview_size);
+    AssetPreview make_asset_preview(const std::filesystem::path& file);
+    AssetPreview make_dir_preview(const std::filesystem::path& dir);
 
     void open_asset_directory(std::filesystem::path dir);
     Rectangle place_preview_rect(int idx, float preview_size, float padding) const;

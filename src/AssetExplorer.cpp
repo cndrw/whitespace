@@ -9,14 +9,34 @@
 // #define EDITOR_DEBUG
 #include "Utils.h"
 
+// static unsigned char FOLDER_ICON[] = {
+//     0b0000'0000'0000'0000,
+//     0b0000'0000'0000'0000,
+//     0b0111'1110'0000'0000,
+//     0b0100'0010'0000'0000,
+//     0b0100'0011'1111'1110,
+//     0b0100'0000'0000'0010,
+//     0b0100'0000'0000'0010,
+//     0b0100'0000'0000'0010,
+//     0b0100'0000'0000'0010,
+//     0b0100'0000'0000'0010,
+//     0b0100'0000'0000'0010,
+//     0b0100'0000'0000'0010,
+//     0b0100'0000'0000'0010,
+//     0b0111'1111'1111'1110,
+//     0b0000'0000'0000'0000,
+//     0b0000'0000'0000'0000
+// };
+
+
+Texture2D FOLDER_TEXTURE;
+
 constexpr auto margin_top { 50 };
 
-AssetExplorer::AssetPreview AssetExplorer::make_dir_preview(
-    const Rectangle& rect, const std::filesystem::path& dir, [[maybe_unused]] const float preview_size)
+AssetExplorer::AssetPreview AssetExplorer::make_dir_preview(const std::filesystem::path& dir)
 {
     return AssetExplorer::AssetPreview(std::make_unique<UIImageButton>(
-        rect,
-        Texture2D{}, // no texture for directories
+        FOLDER_TEXTURE,
         [this, dir]() {
             open_asset_directory(dir);
         }),
@@ -24,12 +44,10 @@ AssetExplorer::AssetPreview AssetExplorer::make_dir_preview(
     );
 }
 
-AssetExplorer::AssetPreview AssetExplorer::make_asset_preview(
-    const Rectangle& rect, const std::filesystem::path& file, [[maybe_unused]] const float preview_size)
+AssetExplorer::AssetPreview AssetExplorer::make_asset_preview(const std::filesystem::path& file)
 {
     const auto* am = Core::Application::get().get_asset_manager();
     return AssetExplorer::AssetPreview(std::make_unique<UIImageButton>(
-        rect,
         am->get_asset(file.stem().string()).texture,
         [this, handle = file.stem().string(), am]() {
             add_scene_element.invoke(am->get_asset(handle));
@@ -49,6 +67,8 @@ void AssetExplorer::set_rect(const Rectangle rect)
 void AssetExplorer::set_root_dir(const std::filesystem::path& root)
 {
     m_root = root;
+    // TODO: just temporary, should be embedded
+    FOLDER_TEXTURE = LoadTexture(R"(D:\Mein stuff\Ordner\Privat\Projects\whitespace\example\assets\folder_icon.png)");
     open_asset_directory(root);
 }
 
@@ -56,19 +76,15 @@ void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
 {
     m_asset_prevs.clear();
 
-    int idx = 0;
-    constexpr float preview_size = 80.f;
-    constexpr float padding = 10.f;
-
     auto* am = Core::Application::get().get_asset_manager();
+
+    std::vector<AssetPreview> files, dirs;
 
     for (const auto& entry : std::filesystem::directory_iterator(dir))
     {
-        const auto rect = place_preview_rect(idx++, preview_size, padding);
-
         if (entry.is_directory())
         {
-            m_asset_prevs.push_back(make_dir_preview(rect, entry, preview_size));
+            dirs.push_back(make_dir_preview(entry));
         }
         else
         {
@@ -78,9 +94,13 @@ void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
                 am->add_asset(path);
             }
             
-            m_asset_prevs.push_back(make_asset_preview(rect, entry, preview_size));
+            files.push_back(make_asset_preview(entry));
         }
     }
+
+    // join dirs and files -> now ordered
+    std::move(files.begin(), files.end(), std::back_inserter(dirs));
+    m_asset_prevs = std::move(dirs);
 }
 
 void AssetExplorer::render()
@@ -190,8 +210,14 @@ void AssetExplorer::draw_path_trace()
 
 void AssetExplorer::draw_asset_previews() const
 {
+    int idx = 0;
+    constexpr float preview_size = 80.f;
+    constexpr float padding = 10.f;
+
     for (const auto& [btn, label] : m_asset_prevs)
     {
+        const auto rect = place_preview_rect(idx++, preview_size, padding);
+        btn->rect = rect;
         btn->render();
         draw_asset_label(btn->rect, label.c_str(), btn->rect.width);
     }

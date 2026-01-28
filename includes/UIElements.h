@@ -60,6 +60,9 @@ class UIImageButton : public UIButton
 public:
     UIImageButton() = default;
 
+    UIImageButton(Texture2D texture, Callback on_click)
+        : UIImageButton(Rectangle{}, texture, on_click) {}
+
     UIImageButton(const Rectangle& rect, Texture2D texture, Callback on_click);
 
     virtual ~UIImageButton() = default;
