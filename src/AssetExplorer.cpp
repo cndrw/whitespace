@@ -167,8 +167,41 @@ void AssetExplorer::draw_asset_label(
         .height = 15
     };
 
-    // DRAW_DEBUG_RECTANGLE(label_rect, BLUE);      
-    GuiLabel(label_rect, text);
+    float text_width =
+        MeasureTextEx(GuiGetFont(), text, GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
+    
+    if (text_width < label_rect.width)
+    {
+        // center text
+        const float offset = (label_rect.width - text_width) / 2.0;
+        Rectangle centered_label_rect = label_rect;
+        centered_label_rect.x += offset;
+        GuiLabel(centered_label_rect, text);
+        return;
+    }
+    else if (text_width > label_rect.width)
+    {
+        // TODO: this should probably be a general util function -> fit_text_to_rect
+        text_width = 0;
+        std::string trunc_text; 
+        int idx = 0;
+        const auto ellipsis_len = MeasureTextEx(GuiGetFont(), "..", GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
+        while (text_width < label_rect.width - ellipsis_len)
+        {
+            trunc_text += text[idx];
+            text_width =
+                MeasureTextEx(GuiGetFont(), trunc_text.c_str(), GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
+            idx++;
+        }
+        trunc_text += "..";
+        // DRAW_DEBUG_RECTANGLE(label_rect, BLUE);      
+        GuiLabel(label_rect, trunc_text.c_str());
+    }
+    else 
+    {
+        GuiLabel(label_rect, text);
+    }
+
 }
 
 void AssetExplorer::draw_path_trace()
