@@ -123,10 +123,15 @@ bool AssetExplorer::process_input()
 
     for (const auto& btn : m_asset_prevs | std::views::keys)
     {
-        if (CheckCollisionPointRec(mpos, btn->rect) && left_clicked)
+        btn->show_bg = false;
+        if (btn->is_hovered())
         {
-            btn->on_click();
-            return true;
+            btn->show_bg = true;
+            if (left_clicked)
+            {
+                btn->on_click();
+                return true;
+            }
         }
     }
 

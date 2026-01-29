@@ -25,8 +25,8 @@ void UIButton::render_impl()
     GuiLabelButton(rect, text.c_str());
 }
 
-UIImageButton::UIImageButton(const Rectangle& rect, Texture2D texture, Callback on_click)
-    : UIButton(rect, on_click), texture(texture)
+UIImageButton::UIImageButton(const Rectangle& rect, Texture2D texture, Callback on_click, Callback on_hover)
+    : UIButton(rect, [](){}, on_click, on_hover), texture(texture)
 {
     render = [this]() { this->render_impl(); };
 }
@@ -39,7 +39,10 @@ void UIImageButton::render_impl()
         return;
     }
 
-    DrawRectangleRec(rect, GRAY);
+    if (show_bg)
+    {
+        DrawRectangleRec(rect, bg_color);
+    }
     DrawTexturePro(
         texture,
         Rectangle { 0, 0, static_cast<float>(texture.width), static_cast<float>(texture.height) },

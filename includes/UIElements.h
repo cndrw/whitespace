@@ -61,9 +61,12 @@ public:
     UIImageButton() = default;
 
     UIImageButton(Texture2D texture, Callback on_click)
-        : UIImageButton(Rectangle{}, texture, on_click) {}
+        : UIImageButton(texture, on_click, [](){}) {}
 
-    UIImageButton(const Rectangle& rect, Texture2D texture, Callback on_click);
+    UIImageButton(Texture2D texture, Callback on_click, Callback on_hover)
+        : UIImageButton(Rectangle{}, texture, on_click, on_hover) {}
+
+    UIImageButton(const Rectangle& rect, Texture2D texture, Callback on_click, Callback on_hover);
 
     virtual ~UIImageButton() = default;
 
@@ -72,6 +75,8 @@ private:
 
 public:
     Texture2D texture;
+    Color bg_color = { 170, 87, 76, 200 };
+    bool show_bg = false;
 };
 
 class UIDropDownList : public UIButton 
