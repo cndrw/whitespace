@@ -38,3 +38,6 @@ public:
     friend std::ostream& operator<<(std::ostream& stream, const Vec2& v);
 
 };
+
+
+[[nodiscard]] bool IsMouseButtonPressedTwice(int button);

@@ -38,6 +38,7 @@ namespace Core
 		}
 
         AssetManager* get_asset_manager();
+        static float get_time();
 
     private:
         std::vector<std::unique_ptr<Layer>> m_layers;

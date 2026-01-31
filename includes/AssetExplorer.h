@@ -21,7 +21,7 @@ public:
     void set_root_dir(const std::filesystem::path& root);
     void render();
     bool process_input();
-    Rectangle get_rect() const { return m_window_rect; }
+    Rectangle get_rect() const { return m_outer_rect; }
 
     Core::Event<Core::Asset> add_scene_element;
     Core::Event<const Core::Asset&> on_asset_prev_clicked;
@@ -39,9 +39,10 @@ private:
     void draw_asset_previews() const;
 
 private:
-    std::filesystem::path m_root;
-    std::filesystem::path m_current_directory;
-    Rectangle m_window_rect;    
-    std::vector<AssetPreview> m_asset_prevs;
     std::vector<std::unique_ptr<UIButton>> m_ptrace_labels;
+    std::vector<AssetPreview> m_asset_prevs;
+    std::filesystem::path m_current_directory;
+    std::filesystem::path m_root;
+    std::string m_selected_preview;
+    Rectangle m_outer_rect, m_inner_rect;    
 };

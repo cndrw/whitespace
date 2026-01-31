@@ -10,6 +10,7 @@
 
 #include "application.h"
 #include "layer.h"
+#include "Utils.h"
 
 
 namespace Core
@@ -86,6 +87,11 @@ namespace Core
     Application& Application::get()
     {
         return *s_application;
+    }
+
+    float Application::get_time()
+    {
+        return GetTime();
     }
 
 }

@@ -18,11 +18,12 @@ public:
     AppLayer() = default;
     // virtual void init() override;
     // virtual void update() override;
+    ~AppLayer() {};
+
     void open_project();
     void load_scene(const std::string& scene_name);
     std::string get_cur_scene_name() const;
     Core::Event<const ProjectMetadata&> on_project_update; 
-    ~AppLayer() {};
 
 private:
     std::filesystem::path m_project_root;

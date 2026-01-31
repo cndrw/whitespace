@@ -28,6 +28,8 @@
 //     0b0000'0000'0000'0000
 // };
 
+static bool state = false;
+
 
 Texture2D FOLDER_TEXTURE;
 
@@ -47,11 +49,14 @@ AssetExplorer::AssetPreview AssetExplorer::make_dir_preview(const std::filesyste
 AssetExplorer::AssetPreview AssetExplorer::make_asset_preview(const std::filesystem::path& file)
 {
     const auto* am = Core::Application::get().get_asset_manager();
+    const auto handle = file.stem().string();
+
     return AssetExplorer::AssetPreview(std::make_unique<UIImageButton>(
-        am->get_asset(file.stem().string()).texture,
-        [this, handle = file.stem().string(), am]() {
-            add_scene_element.invoke(am->get_asset(handle));
+        am->get_asset(handle).texture,
+        [this, handle, am]() {
             on_asset_prev_clicked.invoke(am->get_asset(handle));
+            m_selected_preview = handle; 
+            state = true;
         }),
         file.stem().string()
     );
@@ -59,7 +64,14 @@ AssetExplorer::AssetPreview AssetExplorer::make_asset_preview(const std::filesys
 
 void AssetExplorer::set_rect(const Rectangle rect)
 {
-    m_window_rect = rect;
+    constexpr float padding { 6.0 };
+    m_outer_rect = rect;
+    m_inner_rect = {
+        .x = rect.x + padding,
+        .y = rect.y + padding,
+        .width = rect.width - 2 * padding,
+        .height = rect.height - 2 * padding
+    };
 }
 
 // TODO: kann man den root_dir nicht mit im constructor setzen? sollte da schon bekannt sein
@@ -105,7 +117,8 @@ void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
 
 void AssetExplorer::render()
 {
-    GuiGroupBox(m_window_rect, "AssetExplorer");
+    DrawRectangleRec(m_outer_rect, Color { 242, 217, 191, 225 });
+    GuiGroupBox(m_inner_rect, "AssetExplorer");
 
     if (m_root.empty())
     {
@@ -119,6 +132,15 @@ void AssetExplorer::render()
 bool AssetExplorer::process_input()
 {
     const Vec2 mpos = GetMousePosition();
+
+    if (state && !CheckCollisionPointRec(mpos, m_outer_rect))
+    {
+        state = false;
+        add_scene_element.invoke(
+            Core::Application::get().get_asset_manager()->get_asset(m_selected_preview)
+        );
+    }
+
     const bool left_clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
     for (const auto& btn : m_asset_prevs | std::views::keys)
@@ -144,14 +166,14 @@ bool AssetExplorer::process_input()
         }
     }
 
-    return CheckCollisionPointRec(mpos, m_window_rect);
+    return CheckCollisionPointRec(mpos, m_outer_rect);
 }
 
 Rectangle AssetExplorer::place_preview_rect(int idx, float preview_size, float padding) const
 {
     return {
-        .x = m_window_rect.x + (idx * (preview_size + padding) + 10),
-        .y = m_window_rect.y + margin_top,
+        .x = m_inner_rect.x + (idx * (preview_size + padding) + 10),
+        .y = m_inner_rect.y + margin_top,
         .width = preview_size,
         .height = preview_size
     };
@@ -218,8 +240,8 @@ void AssetExplorer::draw_path_trace()
         label_width = MeasureTextEx(GuiGetFont(), text.c_str(), GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
 
         Rectangle rect = {
-            .x = m_window_rect.x + 10 + (x_offset),
-            .y = m_window_rect.y + 20,
+            .x = m_inner_rect.x + 10 + (x_offset),
+            .y = m_inner_rect.y + 20,
             .width = label_width,
             .height = 20
         };
@@ -235,8 +257,8 @@ void AssetExplorer::draw_path_trace()
         {
             // draw separator
             Rectangle rect = {
-                .x = m_window_rect.x + 10 + (x_offset - label_spacing) + 4,
-                .y = m_window_rect.y + 20,
+                .x = m_inner_rect.x + 10 + (x_offset - label_spacing) + 4,
+                .y = m_inner_rect.y + 20,
                 .width = label_spacing,
                 .height = 20
             };

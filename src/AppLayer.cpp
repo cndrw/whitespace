@@ -56,3 +56,4 @@ std::string AppLayer::get_cur_scene_name() const
 {
     return m_cur_proj_data.scene_list[m_cur_proj_data.active_scene_idx];
 }
+

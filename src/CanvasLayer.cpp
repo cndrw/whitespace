@@ -58,10 +58,11 @@ void CanvasLayer::init()
 void CanvasLayer::add_scene_element(const Core::Asset& asset)
 {
     constexpr auto ppu { 16 };
+    const Vec2 mpos = GetMousePosition();
     auto sprite_element = std::make_shared<SpriteElement>();
     sprite_element->name = resolve_naming(asset.path);
-    sprite_element->pos = { (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 };
     sprite_element->texture = asset.texture;
+    sprite_element->pos = mpos;
     sprite_element->ppu = ppu;
     sprite_element->width = sprite_element->texture.width * ppu;
     sprite_element->height = sprite_element->texture.height * ppu;
@@ -70,6 +71,7 @@ void CanvasLayer::add_scene_element(const Core::Asset& asset)
 
     m_sprite_elements[0].push_back(sprite_element);
     m_focused_sprite_elem = m_sprite_elements[0].back();
+    m_sprite_drag_offset = { m_focused_sprite_elem->width / 2, m_focused_sprite_elem->height / 2 };
 }
 
 void CanvasLayer::remove_scene_element(const std::shared_ptr<SpriteElement>& element)
