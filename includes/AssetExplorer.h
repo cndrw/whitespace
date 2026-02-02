@@ -37,6 +37,7 @@ private:
     void draw_asset_label(const Rectangle& preview_rect, const char* text, float preview_size) const;
     void draw_path_trace();
     void draw_asset_previews() const;
+    void draw_drag_action_indicator() const;
 
 private:
     std::vector<std::unique_ptr<UIButton>> m_ptrace_labels;
@@ -45,5 +46,5 @@ private:
     std::filesystem::path m_root;
     std::string m_selected_preview;
     Rectangle m_outer_rect, m_inner_rect;    
-    bool m_create_asset_action = false;
+    bool m_drag_action = false;
 };

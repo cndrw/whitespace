@@ -52,7 +52,7 @@ AssetExplorer::AssetPreview AssetExplorer::make_asset_preview(const std::filesys
         [this, handle, am]() {
             on_asset_prev_clicked.invoke(am->get_asset(handle));
             m_selected_preview = handle; 
-            m_create_asset_action = true;
+            m_drag_action = true;
         }),
         file.stem().string()
     );
@@ -113,7 +113,8 @@ void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
 
 void AssetExplorer::render()
 {
-    DrawRectangleRec(m_outer_rect, Color { 242, 217, 191, 225 });
+    static constexpr Color bg_color = { 242, 217, 191, 225 };
+    DrawRectangleRec(m_outer_rect, bg_color);
     GuiGroupBox(m_inner_rect, "AssetExplorer");
 
     if (m_root.empty())
@@ -123,39 +124,28 @@ void AssetExplorer::render()
 
     draw_asset_previews();
     draw_path_trace();
-
-
-    // TODO: object to improve
-    if (m_create_asset_action && CheckCollisionPointRec(GetMousePosition(), m_outer_rect))
-    {
-        constexpr Vec2 offset = { 20, 10 };
-        const Vec2 mpos = GetMousePosition();
-
-        DrawRectangleLinesEx({
-            .x = mpos.x - offset.x  / 2.0f,
-            .y = mpos.y - offset.y / 2.0f,
-            .width = offset.x,
-            .height = offset.y
-        }, 1.0f, RAYWHITE);
-    }
+    draw_drag_action_indicator();
 }
 
 bool AssetExplorer::process_input()
 {
     const Vec2 mpos = GetMousePosition();
+    const bool left_clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
-    m_create_asset_action = m_create_asset_action && IsMouseButtonDown(MOUSE_BUTTON_LEFT);
-    if (m_create_asset_action && !CheckCollisionPointRec(mpos, m_outer_rect))
+    if (m_drag_action && !CheckCollisionPointRec(mpos, m_outer_rect))
     {
-        m_create_asset_action = false;
+        m_drag_action = false;
         add_scene_element.invoke(
             Core::Application::get().get_asset_manager()->get_asset(m_selected_preview)
         );
     }
 
-    const bool left_clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    if (!IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    {
+        m_drag_action = false;
+    }
 
-    if (!m_create_asset_action)
+    if (!m_drag_action)
     {
         for (const auto& btn : m_asset_prevs | std::views::keys)
         {
@@ -195,8 +185,7 @@ Rectangle AssetExplorer::place_preview_rect(int idx, float preview_size, float p
     };
 }
 
-void AssetExplorer::draw_asset_label(
-    const Rectangle& preview_rect, const char* text, const float preview_size) const
+void AssetExplorer::draw_asset_label(const Rectangle& preview_rect, const char* text, const float preview_size) const
 {
     const Rectangle label_rect = {
         .x = preview_rect.x,
@@ -221,14 +210,17 @@ void AssetExplorer::draw_asset_label(
     {
         // TODO: this should probably be a general util function -> fit_text_to_rect
         text_width = 0;
-        std::string trunc_text; 
         int idx = 0;
-        const auto ellipsis_len = MeasureTextEx(GuiGetFont(), "..", GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
+        std::string trunc_text; 
+
+        const int gui_txt_size = GuiGetStyle(DEFAULT, TEXT_SIZE);
+        const int gui_txt_spacing = GuiGetStyle(DEFAULT, TEXT_SPACING);
+
+        const auto ellipsis_len = MeasureTextEx(GuiGetFont(), "..", gui_txt_size, gui_txt_spacing).x;
         while (text_width < label_rect.width - ellipsis_len)
         {
             trunc_text += text[idx];
-            text_width =
-                MeasureTextEx(GuiGetFont(), trunc_text.c_str(), GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
+            text_width = MeasureTextEx(GuiGetFont(), trunc_text.c_str(), gui_txt_size, gui_txt_spacing).x;
             idx++;
         }
         trunc_text += "..";
@@ -297,6 +289,23 @@ void AssetExplorer::draw_asset_previews() const
         btn->render();
         draw_asset_label(btn->rect, label.c_str(), btn->rect.width);
     }
+}
+
+void AssetExplorer::draw_drag_action_indicator() const
+{
+    if (!m_drag_action) return;
+
+    static constexpr Vec2 offset = { 20, 10 };
+    const Vec2 mpos = GetMousePosition();
+    const Rectangle rect = {
+        .x = mpos.x - offset.x / 2.0f,
+        .y = mpos.y - offset.y / 2.0f,
+        .width = offset.x,
+        .height = offset.y
+    };
+
+    DrawRectangleRec(rect, Color { 254, 254, 254, 50 });
+    DrawRectangleLinesEx(rect, 1.0f, RAYWHITE);
 }
 
 std::unique_ptr<UIButton> AssetExplorer::make_path_trace_label(const std::filesystem::path& path)
