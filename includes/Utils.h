@@ -29,6 +29,7 @@ public:
     [[nodiscard]] constexpr Vec2 operator*(float val) const;
     [[nodiscard]] constexpr Vec2& operator+=(const Vec2& other);
     [[nodiscard]] constexpr Vec2& operator-=(const Vec2& other);
+    [[nodiscard]] constexpr Vec2 operator/(double val) const;
     [[nodiscard]] constexpr Vec2 operator/(float val) const;
     [[nodiscard]] constexpr Vec2 operator+(const Vec2& other) const;
     [[nodiscard]] constexpr Vec2 operator-(const Vec2& rhs) const;

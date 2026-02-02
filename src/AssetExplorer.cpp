@@ -28,12 +28,8 @@
 //     0b0000'0000'0000'0000
 // };
 
-static bool state = false;
-
 
 Texture2D FOLDER_TEXTURE;
-
-constexpr auto margin_top { 50 };
 
 AssetExplorer::AssetPreview AssetExplorer::make_dir_preview(const std::filesystem::path& dir)
 {
@@ -56,7 +52,7 @@ AssetExplorer::AssetPreview AssetExplorer::make_asset_preview(const std::filesys
         [this, handle, am]() {
             on_asset_prev_clicked.invoke(am->get_asset(handle));
             m_selected_preview = handle; 
-            state = true;
+            m_create_asset_action = true;
         }),
         file.stem().string()
     );
@@ -127,15 +123,31 @@ void AssetExplorer::render()
 
     draw_asset_previews();
     draw_path_trace();
+
+
+    // TODO: object to improve
+    if (m_create_asset_action && CheckCollisionPointRec(GetMousePosition(), m_outer_rect))
+    {
+        constexpr Vec2 offset = { 20, 10 };
+        const Vec2 mpos = GetMousePosition();
+
+        DrawRectangleLinesEx({
+            .x = mpos.x - offset.x  / 2.0f,
+            .y = mpos.y - offset.y / 2.0f,
+            .width = offset.x,
+            .height = offset.y
+        }, 1.0f, RAYWHITE);
+    }
 }
 
 bool AssetExplorer::process_input()
 {
     const Vec2 mpos = GetMousePosition();
 
-    if (state && !CheckCollisionPointRec(mpos, m_outer_rect))
+    m_create_asset_action = m_create_asset_action && IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+    if (m_create_asset_action && !CheckCollisionPointRec(mpos, m_outer_rect))
     {
-        state = false;
+        m_create_asset_action = false;
         add_scene_element.invoke(
             Core::Application::get().get_asset_manager()->get_asset(m_selected_preview)
         );
@@ -143,16 +155,19 @@ bool AssetExplorer::process_input()
 
     const bool left_clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
-    for (const auto& btn : m_asset_prevs | std::views::keys)
+    if (!m_create_asset_action)
     {
-        btn->show_bg = false;
-        if (btn->is_hovered())
+        for (const auto& btn : m_asset_prevs | std::views::keys)
         {
-            btn->show_bg = true;
-            if (left_clicked)
+            btn->show_bg = false;
+            if (btn->is_hovered())
             {
-                btn->on_click();
-                return true;
+                btn->show_bg = true;
+                if (left_clicked)
+                {
+                    btn->on_click();
+                    return true;
+                }
             }
         }
     }
@@ -171,6 +186,7 @@ bool AssetExplorer::process_input()
 
 Rectangle AssetExplorer::place_preview_rect(int idx, float preview_size, float padding) const
 {
+    static constexpr auto margin_top { 50 };
     return {
         .x = m_inner_rect.x + (idx * (preview_size + padding) + 10),
         .y = m_inner_rect.y + margin_top,

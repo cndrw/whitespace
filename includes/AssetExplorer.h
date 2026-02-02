@@ -45,4 +45,5 @@ private:
     std::filesystem::path m_root;
     std::string m_selected_preview;
     Rectangle m_outer_rect, m_inner_rect;    
+    bool m_create_asset_action = false;
 };

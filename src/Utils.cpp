@@ -29,7 +29,7 @@ constexpr Vec2 Vec2::operator-() const
 }
 
 [[nodiscard]]
-constexpr Vec2 Vec2::operator/(const float val) const
+constexpr Vec2 Vec2::operator/(const double val) const
 {
     if (val == 0)
     {
@@ -40,6 +40,13 @@ constexpr Vec2 Vec2::operator/(const float val) const
     res.x /= val;
     res.y /= val;
     return res;
+}
+
+
+[[nodiscard]]
+constexpr Vec2 Vec2::operator/(const float val) const
+{
+    return *this / static_cast<double>(val);
 }
 
 [[nodiscard]]
