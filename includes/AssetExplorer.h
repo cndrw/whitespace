@@ -13,18 +13,20 @@
 #include "Utils.h"
 
 
-class AssetExplorer
+class AssetExplorer : public UIComponent
 {
 public:
     using AssetPreview = std::pair<std::unique_ptr<UIImageButton>, std::string>;
-    void set_rect(const Rectangle rect);
+    AssetExplorer() : UIComponent{"Asset Explorer"} {} 
     void set_root_dir(const std::filesystem::path& root);
-    void render();
     bool process_input();
     Rectangle get_rect() const { return m_outer_rect; }
 
     Core::Event<Core::Asset> add_scene_element;
     Core::Event<const Core::Asset&> on_asset_prev_clicked;
+
+protected:
+    void render_impl() override;
 
 private:
     void build_explorer_view(const std::filesystem::path& root);
@@ -45,6 +47,5 @@ private:
     std::filesystem::path m_current_directory;
     std::filesystem::path m_root;
     std::string m_selected_preview;
-    Rectangle m_outer_rect, m_inner_rect;    
     bool m_drag_action = false;
 };

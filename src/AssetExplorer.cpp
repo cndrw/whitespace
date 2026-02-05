@@ -58,18 +58,6 @@ AssetExplorer::AssetPreview AssetExplorer::make_asset_preview(const std::filesys
     );
 }
 
-void AssetExplorer::set_rect(const Rectangle rect)
-{
-    constexpr float padding { 6.0 };
-    m_outer_rect = rect;
-    m_inner_rect = {
-        .x = rect.x + padding,
-        .y = rect.y + padding,
-        .width = rect.width - 2 * padding,
-        .height = rect.height - 2 * padding
-    };
-}
-
 // TODO: kann man den root_dir nicht mit im constructor setzen? sollte da schon bekannt sein
 //       dann kann open_asset_directory im constructor/init aufgerufen werden
 void AssetExplorer::set_root_dir(const std::filesystem::path& root)
@@ -111,12 +99,8 @@ void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
     m_asset_prevs = std::move(dirs);
 }
 
-void AssetExplorer::render()
+void AssetExplorer::render_impl()
 {
-    static constexpr Color bg_color = { 242, 217, 191, 225 };
-    DrawRectangleRec(m_outer_rect, bg_color);
-    GuiGroupBox(m_inner_rect, "AssetExplorer");
-
     if (m_root.empty())
     {
         return;

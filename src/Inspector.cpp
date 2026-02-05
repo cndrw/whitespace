@@ -17,7 +17,9 @@ Inspector::Inspector()
 
 void Inspector::render()
 {
-    GuiGroupBox(m_rect, "Inspector");
+    static constexpr Color bg_color = { 242, 217, 191, 225 };
+    DrawRectangleRec(m_outer_rect, bg_color);
+    GuiGroupBox(m_inner_rect, "Inspector");
 
     if (m_current_disp_t == DisplayType::None) { return; }
 
@@ -27,7 +29,7 @@ void Inspector::render()
 void Inspector::draw_label(Vector2 pos, std::string text) const
 {
     // draw relative to inspector pos
-    const auto label_pos = Vector2Add({ m_rect.x, m_rect.y }, pos);
+    const auto label_pos = Vector2Add({ m_inner_rect.x, m_inner_rect.y }, pos);
     const Rectangle label_rect =
         { label_pos.x, label_pos.y, (float)m_label_width, (float)m_label_height };
     DRAW_DEBUG_RECTANGLE(label_rect, MAGENTA);
@@ -53,8 +55,8 @@ void Inspector::draw_asset_element_content() const
     draw_label({10, 10}, std::format("Name: {}", m_focused_asset.path.stem().string().c_str()));
     draw_label({10, 30}, std::format("PPU: {}", m_focused_asset.ppu));
 
-    const float width = m_rect.width - 20.0f;
-    const Vec2 pos = { m_rect.x + 10.0f, m_rect.y + m_rect.height - width - 10.0f };
+    const float width = m_inner_rect.width - 20.0f;
+    const Vec2 pos = { m_inner_rect.x + 10.0f, m_inner_rect.y + m_inner_rect.height - width - 10.0f };
     const Rectangle asset_rect = { pos.x, pos.y, width, width };
 
 
@@ -71,7 +73,17 @@ void Inspector::draw_asset_element_content() const
 
 void Inspector::set_rect(const Rectangle rect)
 {
-    m_rect = rect;
+    // m_inner_rect = rect;
+    m_outer_rect = rect;
+    constexpr float padding { 6.0 };
+    m_outer_rect = rect;
+    m_inner_rect = {
+        .x = rect.x + padding,
+        .y = rect.y + padding,
+        .width = rect.width - 2 * padding,
+        .height = rect.height - 2 * padding
+    };
+
     m_label_width = rect.width - 20; // 10 padding each side
     m_label_height = 15; 
 }

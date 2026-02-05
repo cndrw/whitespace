@@ -168,3 +168,22 @@ bool UIDropDownList::is_hovered()
     }
 }
 
+void UIComponent::render()
+{
+    DrawRectangleRec(m_outer_rect, m_bg_color);
+    GuiGroupBox(m_inner_rect, m_name.c_str());
+
+    render_impl();
+}
+
+void UIComponent::set_rect(const Rectangle rect)
+{
+    constexpr float padding { 6.0 };
+    m_outer_rect = rect;
+    m_inner_rect = {
+        .x = rect.x + padding,
+        .y = rect.y + padding,
+        .width = rect.width - 2 * padding,
+        .height = rect.height - 2 * padding
+    };
+}

@@ -106,3 +106,23 @@ private:
     bool m_header_hovered = false;
     State m_state = State::CLOSED;
 };
+
+class UIComponent
+{
+public:
+    explicit UIComponent(const std::string& name)
+        : m_name{name} {}
+
+    void render();
+    void set_rect(const Rectangle rect);
+
+protected:
+    virtual void render_impl() = 0;
+
+protected:
+    Rectangle m_outer_rect, m_inner_rect;
+
+private:
+    std::string m_name;
+    static constexpr Color m_bg_color = { 242, 217, 191, 225 };
+};
