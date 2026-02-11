@@ -64,6 +64,6 @@ void UILayer::set_asset_root(std::filesystem::path path)
 
 bool UILayer::process_input()
 {
-    bool res = m_asset_explorer.process_input() || m_func_ribbon.process_input();
+    bool res = m_asset_explorer.process_input() || m_func_ribbon.process_input() || m_inspector.process_input();
     return res;
 }

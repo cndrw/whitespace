@@ -31,7 +31,10 @@ public:
     [[nodiscard]] constexpr Vec2& operator-=(const Vec2& other);
     [[nodiscard]] constexpr Vec2 operator/(double val) const;
     [[nodiscard]] constexpr Vec2 operator/(float val) const;
-    [[nodiscard]] constexpr Vec2 operator+(const Vec2& other) const;
+    [[nodiscard]] constexpr Vec2 operator+(const Vec2& other) const
+    {
+        return { x + other.x, y + other.y };
+    }
     [[nodiscard]] constexpr Vec2 operator-(const Vec2& rhs) const;
     [[nodiscard]] constexpr Vec2 operator-(Vec2&& rhs) const;
     [[nodiscard]] constexpr Vec2 operator-() const;

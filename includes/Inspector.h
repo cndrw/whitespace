@@ -7,25 +7,33 @@
 
 #include "SceneElement.h"
 #include "AssetManager.h"
+#include "UIElements.h"
+#include "Utils.h"
 
-enum class DisplayType
+typedef struct 
 {
-    None = -1,
-    SceneElement, SpriteElement, AssetElement
-};
+    std::string label;
+    std::unique_ptr<UITextBox> text_box;
+    Vec2 pos;
+} LabeledTextBox;
 
-class Inspector
+
+class Inspector : public UIComponent
 {
 public:
     Inspector();
-    void set_rect(const Rectangle rect);
+    bool process_input();
     void update_content(const std::optional<SpriteElement>& element); 
     void update_content(const Core::Asset& element); 
-    void render();
     Rectangle get_rect() const { return m_outer_rect; }
 
+protected:
+    void render_impl() override;
+
 private:
-    void draw_label(const Vector2 pos, const std::string label) const;
+    enum class DisplayType { None = -1, SceneElement, SpriteElement, AssetElement };
+    void setup_labels(DisplayType disp_t);
+    void draw_label(const Vec2 pos, const std::string label) const;
     void draw_scene_element_content() const;
     void draw_sprite_element_content() const;
     void draw_asset_element_content() const;
@@ -33,8 +41,8 @@ private:
 private:
     int m_label_width, m_label_height;
     std::array<std::function<void()>, 3> m_draw_funcs;
+    std::array<LabeledTextBox ,5> m_labels;
     DisplayType m_current_disp_t = DisplayType::None;
     SpriteElement m_focused_sprite;
     Core::Asset m_focused_asset;
-    Rectangle m_outer_rect, m_inner_rect;
 };

@@ -187,3 +187,42 @@ void UIComponent::set_rect(const Rectangle rect)
         .height = rect.height - 2 * padding
     };
 }
+
+UITextBox::UITextBox()
+{
+    render = [this] { render_impl(); };
+}
+
+void UITextBox::on_click()
+{
+    m_edit_mode = true;
+}
+
+void UITextBox::cancel_edit()
+{
+    m_edit_mode = false;
+}
+
+bool UITextBox::is_hovered()
+{
+    return CheckCollisionPointRec(GetMousePosition(), rect);
+}
+
+void UITextBox::set_text(const std::string &text)
+{
+    if (text.size() > MAX_BUFFER_SIZE)
+    {
+        std::cerr << "[ERROR] UITextBox string given with 'set_text' exceeds the buffer size\n";
+        return;
+    }
+
+    for (std::size_t i = 0; i < text.size(); i++)
+    {
+        m_buffer[i] = text[i];
+    }
+}
+
+void UITextBox::render_impl()
+{
+    GuiTextBox(rect, m_buffer, MAX_BUFFER_SIZE, m_edit_mode);
+}

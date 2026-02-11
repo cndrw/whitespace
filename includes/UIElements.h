@@ -55,6 +55,27 @@ public:
     std::string text;
 };
 
+class UITextBox : public UIElement
+{
+public:
+    UITextBox();
+    virtual ~UITextBox() override = default;
+
+    void on_click();
+    void cancel_edit();
+    virtual bool is_hovered() override;
+
+    void set_text(const std::string& text);
+
+private:
+    virtual void render_impl();
+
+private:
+    static constexpr auto MAX_BUFFER_SIZE { 20 };
+    char m_buffer[MAX_BUFFER_SIZE];
+    bool m_edit_mode = false;
+};
+
 class UIImageButton : public UIButton
 {
 public:

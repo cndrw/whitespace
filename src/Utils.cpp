@@ -59,15 +59,6 @@ constexpr Vec2 Vec2::operator*(const float val) const
 }
 
 [[nodiscard]]
-constexpr Vec2 Vec2::operator+(const Vec2& other) const
-{
-    Vec2 res = *this;
-    res.x += other.x;
-    res.y += other.y;
-    return res;
-}
-
-[[nodiscard]]
 constexpr Vec2 Vec2::operator-(const Vec2& other) const
 {
     Vec2 res = *this;
