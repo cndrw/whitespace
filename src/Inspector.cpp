@@ -21,7 +21,7 @@ Inspector::Inspector()
 
     for (auto& label : m_labels)
     {
-        label = { "", std::make_unique<UITextBox>(), Vec2{0, 0} };
+        label = { "", std::make_unique<UITextBox>(), Vec2{0, 0}, [](){} };
     }
 }
 
@@ -40,12 +40,14 @@ bool Inspector::process_input()
             else 
             {
                 label.text_box->cancel_edit();
+                label.on_edited();
             }
         }
 
         if (IsKeyPressed(KEY_ENTER))
         {
             label.text_box->cancel_edit();
+            label.on_edited();
         }
     }
 
@@ -59,27 +61,32 @@ void Inspector::render_impl()
     m_draw_funcs[static_cast<int>(m_current_disp_t)]();
 }
 
+
 void Inspector::setup_labels(DisplayType disp_t)
 {
     switch (disp_t)
     {
         case DisplayType::SpriteElement:
         {
-
             m_labels[0].label = "Name:";
             m_labels[0].text_box->set_text(m_focused_sprite.name);
+            m_labels[0].on_edited = [this] { handle_edit(m_focused_sprite.name, 0); };
 
             m_labels[1].label = "X:";
             m_labels[1].text_box->set_text(std::to_string(m_focused_sprite.pos.x));
+            m_labels[1].on_edited = [this] { handle_edit(m_focused_sprite.pos.x, 1); };
 
             m_labels[2].label = "Y:";
             m_labels[2].text_box->set_text(std::to_string(m_focused_sprite.pos.y));
+            m_labels[2].on_edited = [this] { handle_edit(m_focused_sprite.pos.y, 2); };
 
             m_labels[3].label = "Angle:";
             m_labels[3].text_box->set_text(std::to_string(m_focused_sprite.angle));
+            m_labels[3].on_edited = [this] { handle_edit(m_focused_sprite.angle, 3); };
 
             m_labels[4].label = "Layer:";
             m_labels[4].text_box->set_text(std::to_string(m_focused_sprite.layer));
+            m_labels[4].on_edited = [this] { handle_edit(m_focused_sprite.layer, 4); };
             to_draw_idx = 5;
             break;
         }
@@ -142,11 +149,6 @@ void Inspector::draw_sprite_element_content() const
         DRAW_DEBUG_RECTANGLE(rect, MAGENTA);
         m_labels[i].text_box->render();
     }
-    // draw_label({10, 10}, std::format("Name: {}", m_focused_sprite.name));
-    // draw_label({10, 30}, std::format("X: {}", m_focused_sprite.pos.x));
-    // draw_label({10, 50}, std::format("Y: {}", m_focused_sprite.pos.y));
-    // draw_label({10, 70}, std::format("Angle: {}", m_focused_sprite.angle));
-    // draw_label({10, 90}, std::format("Layer: {}", m_focused_sprite.layer));
 }
 
 void Inspector::draw_asset_element_content() const
@@ -170,6 +172,7 @@ void Inspector::draw_asset_element_content() const
     );
 }
 
+
 void Inspector::update_content(const std::optional<SpriteElement>& element)
 {
     // TODO: maybe find a better place for this
@@ -179,8 +182,8 @@ void Inspector::update_content(const std::optional<SpriteElement>& element)
     m_current_disp_t = element.has_value() ? DisplayType::SpriteElement : DisplayType::None;
     if (m_current_disp_t == DisplayType::SpriteElement)
     {
-        setup_labels(m_current_disp_t);
         m_focused_sprite = element.value();
+        setup_labels(m_current_disp_t);
     }
 }
 

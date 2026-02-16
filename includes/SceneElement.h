@@ -16,16 +16,24 @@ public:
 class SpriteElement : public SceneElement
 {
 public:
+    SpriteElement()
+        : m_id{id_counter++} { }
+
     using Handle = std::string;
     Handle handle;
 
-    Texture2D texture;
     float width;
     float height;
     float angle;
     int ppu;
     uint8_t layer = 0;
 
+private:
+    inline static uint16_t id_counter = 0;
+    uint16_t m_id;
+
+public:
+    uint16_t get_id() const { return m_id; }
     inline Rectangle rect() const
     {
         return { pos.x, pos.y, width, height };

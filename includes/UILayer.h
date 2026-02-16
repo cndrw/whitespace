@@ -20,6 +20,7 @@ public:
     void set_asset_root(std::filesystem::path path);
     
     AssetExplorer* get_asset_explorer() { return &m_asset_explorer; } 
+    Inspector* get_inspector() { return &m_inspector; } 
 
 private:
     std::vector<Rectangle> m_clickable_obj;

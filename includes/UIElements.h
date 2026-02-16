@@ -66,6 +66,7 @@ public:
     virtual bool is_hovered() override;
 
     void set_text(const std::string& text);
+    std::string get_text() const { return std::string(m_buffer); };
 
 private:
     virtual void render_impl();

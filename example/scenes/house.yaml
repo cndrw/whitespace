@@ -1,6 +1,6 @@
 SpriteElements:
-  heart_2:
-    x: 768
+  heart_3:
+    x: 512
     y: 80
     layer: 0
     asset_ref: heart
@@ -9,8 +9,8 @@ SpriteElements:
     y: 80
     layer: 0
     asset_ref: heart
-  heart_3:
-    x: 512
+  heart_4:
+    x: 752
     y: 80
     layer: 0
     asset_ref: heart

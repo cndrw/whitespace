@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <memory>
 
 #include "UIElements.h"
@@ -215,6 +216,8 @@ void UITextBox::set_text(const std::string &text)
         std::cerr << "[ERROR] UITextBox string given with 'set_text' exceeds the buffer size\n";
         return;
     }
+
+    std::memset(m_buffer, 0, MAX_BUFFER_SIZE);
 
     for (std::size_t i = 0; i < text.size(); i++)
     {

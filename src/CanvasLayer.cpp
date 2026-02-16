@@ -53,6 +53,26 @@ void CanvasLayer::init()
             std::cout << "add: " << asset.path << std::endl;
             add_scene_element(asset);
         });
+
+
+    Core::Application::get()
+        .get_layer<UILayer>()
+        ->get_inspector()
+        ->on_sprite_elem_changed.add_listener([this] (SpriteElement changed_elem)
+        {
+           for (auto& layer : m_sprite_elements | std::views::values)
+           {
+                for (auto& elem : layer)
+                {
+                    if (elem->get_id() == changed_elem.get_id())
+                    {
+                        std::cout << "update\n";
+                        *elem = changed_elem;
+                        return;
+                    }
+                }
+           } 
+        });
 }
 
 void CanvasLayer::add_scene_element(const Core::Asset& asset)
@@ -61,11 +81,11 @@ void CanvasLayer::add_scene_element(const Core::Asset& asset)
     const Vec2 mpos = GetMousePosition();
     auto sprite_element = std::make_shared<SpriteElement>();
     sprite_element->name = resolve_naming(asset.path);
-    sprite_element->texture = asset.texture;
+    // sprite_element->texture = asset.texture;
     sprite_element->pos = mpos;
     sprite_element->ppu = ppu;
-    sprite_element->width = sprite_element->texture.width * ppu;
-    sprite_element->height = sprite_element->texture.height * ppu;
+    sprite_element->width = asset.texture.width * ppu;
+    sprite_element->height = asset.texture.height * ppu;
     sprite_element->handle = asset.path.stem().string();
     sprite_element->layer = 0;
 
@@ -135,17 +155,21 @@ void CanvasLayer::update()
 void CanvasLayer::render()
 {
     draw_reference_resolution({1920, 1080});
+    const auto* am = Core::Application::get().get_asset_manager();
 
     for (const auto& [_, elements] : m_sprite_elements)
     {
         for (const auto& element : elements)
         {
-            DrawTexturePro(element->texture,
-                { 0.0, 0.0, (float)element->texture.width, (float)element->texture.height },
+            std::cout << element->name << std::endl;
+            const auto texture = am->get_asset(element->handle).texture;
+            DrawTexturePro(texture,
+                { 0.0, 0.0, (float)texture.width, (float)texture.height },
                 transform_to_screen(element->rect()), { 0, 0 }, 0, RAYWHITE
             );
         }
     }
+    std::cout << std::endl;
 
     if (m_focused_sprite_elem)
     {
@@ -246,10 +270,10 @@ void CanvasLayer::load_scene(const std::string& scene_name)
         Handle handle = it.second["asset_ref"].as<std::string>();
         Core::Asset asset = am->get_asset(handle);
         sprite_element->handle = handle; 
-        sprite_element->texture = asset.texture;
+        // sprite_element->texture = asset.texture;
         sprite_element->ppu = ppu;
-        sprite_element->width = sprite_element->texture.width * ppu;
-        sprite_element->height = sprite_element->texture.height * ppu;
+        sprite_element->width = asset.texture.width * ppu;
+        sprite_element->height = asset.texture.height * ppu;
         sprite_element->layer = 0;
 
         m_sprite_elements[0].push_back(sprite_element);
