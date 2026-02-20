@@ -50,7 +50,6 @@ void CanvasLayer::init()
         ->get_asset_explorer()
         ->add_scene_element.add_listener([this] (const auto& asset)
         {
-            std::cout << "add: " << asset.path << std::endl;
             add_scene_element(asset);
         });
 
@@ -66,7 +65,6 @@ void CanvasLayer::init()
                 {
                     if (elem->get_id() == changed_elem.get_id())
                     {
-                        std::cout << "update\n";
                         *elem = changed_elem;
                         return;
                     }
@@ -161,15 +159,13 @@ void CanvasLayer::render()
     {
         for (const auto& element : elements)
         {
-            std::cout << element->name << std::endl;
             const auto texture = am->get_asset(element->handle).texture;
             DrawTexturePro(texture,
                 { 0.0, 0.0, (float)texture.width, (float)texture.height },
-                transform_to_screen(element->rect()), { 0, 0 }, 0, RAYWHITE
+                transform_to_screen(element->rect()), { 0, 0 }, element->angle, RAYWHITE
             );
         }
     }
-    std::cout << std::endl;
 
     if (m_focused_sprite_elem)
     {
@@ -254,9 +250,7 @@ void CanvasLayer::load_scene(const std::string& scene_name)
     m_focused_sprite_elem = nullptr;
 
     auto& app = Core::Application::get();
-    std::cout << "before\n";
     const auto scene = app.get_layer<DataPersitanceLayer>()->load_scene(scene_name);
-    std::cout << "after\n";
 
     auto* const am = app.get_asset_manager();
     for (const auto& it : scene["SpriteElements"])
@@ -271,7 +265,7 @@ void CanvasLayer::load_scene(const std::string& scene_name)
         Core::Asset asset = am->get_asset(handle);
         sprite_element->handle = handle; 
         // sprite_element->texture = asset.texture;
-        sprite_element->ppu = ppu;
+        sprite_element->ppu = ppu; // asset.ppu;
         sprite_element->width = asset.texture.width * ppu;
         sprite_element->height = asset.texture.height * ppu;
         sprite_element->layer = 0;
@@ -331,7 +325,6 @@ bool CanvasLayer::process_input()
 
         if (IsKeyDown(KEY_SPACE) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
         {
-            std::cout << "2\n";
             const Vector2 delta_pos = GetMouseDelta();
             m_origin.x += delta_pos.x;
             m_origin.y += delta_pos.y;

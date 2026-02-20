@@ -6,6 +6,7 @@
 
 #include "raymath.h"
 
+#include "Application.h"
 #include "SceneElement.h"
 #include "AssetManager.h"
 #include "UIElements.h"
@@ -19,6 +20,7 @@ typedef struct
     Vec2 pos;
     std::function<void()> on_edited;
 } LabeledTextBox;
+
 
 
 class Inspector : public UIComponent
@@ -38,17 +40,42 @@ protected:
 private:
     enum class DisplayType { None = -1, SceneElement, SpriteElement, AssetElement };
     void setup_labels(DisplayType disp_t);
-    void draw_label(const Vec2 pos, const std::string label) const;
-    void draw_scene_element_content() const;
-    void draw_sprite_element_content() const;
-    void draw_asset_element_content() const;
+
+    template<typename T>
+    void set_label(const std::string text, const uint8_t idx, T& field)
+    {
+        m_labels[idx].label = text;
+        if constexpr (std::is_same_v<T, std::string>)
+        {
+            m_labels[idx].text_box->set_text(field);
+        }
+        else
+        {
+            m_labels[idx].text_box->set_text(std::to_string(field));
+        }
+
+        m_labels[idx].on_edited = [this, &field, idx] { handle_edit(field, idx); };
+    }
 
     template<typename T>
     void handle_edit(T& field, const uint8_t idx)
     {
+        static auto* am = Core::Application::get().get_asset_manager();
         try {
             field = parse_textbox<T>(m_labels[idx].text_box.get());
-            on_sprite_elem_changed.invoke(m_focused_sprite);
+            switch (m_current_disp_t)
+            {
+                case DisplayType::SpriteElement:
+                    on_sprite_elem_changed.invoke(m_focused_sprite);
+                    break;
+
+                case DisplayType::AssetElement:
+                    am->update_asset(m_focused_asset);
+                    break;
+                
+                default:
+                    break;
+            }
         }
         catch (...) { }
     }
@@ -77,9 +104,9 @@ private:
 
 private:
     int m_label_width, m_label_height;
-    std::array<std::function<void()>, 3> m_draw_funcs;
     std::array<LabeledTextBox ,5> m_labels;
     DisplayType m_current_disp_t = DisplayType::None;
     SpriteElement m_focused_sprite;
     Core::Asset m_focused_asset;
+    uint8_t m_label_count = 0;
 };
