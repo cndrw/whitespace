@@ -59,17 +59,18 @@ void CanvasLayer::init()
         ->get_inspector()
         ->on_sprite_elem_changed.add_listener([this] (SpriteElement changed_elem)
         {
-           for (auto& layer : m_sprite_elements | std::views::values)
-           {
+            for (auto& layer : m_sprite_elements | std::views::values)
+            {
                 for (auto& elem : layer)
                 {
                     if (elem->get_id() == changed_elem.get_id())
                     {
                         *elem = changed_elem;
-                        return;
+                        break;
                     }
                 }
-           } 
+            } 
+
         });
 }
 
@@ -160,10 +161,27 @@ void CanvasLayer::render()
         for (const auto& element : elements)
         {
             const auto texture = am->get_asset(element->handle).texture;
+
+            Vec2 midpoint = element->pos + Vec2{ element->width / 2, element->height / 2 };
+            Vec2 offset =  element->pos - midpoint;
+
+            const float angle = element->angle * DEG2RAD; 
+            Vec2 rotated = Vec2{
+                offset.x * cos(angle) - offset.y * sin(angle),
+                offset.x * sin(angle) + offset.y * cos(angle)
+            };
+
+            Vec2 pos = element->pos + (rotated - offset);
+
             DrawTexturePro(texture,
                 { 0.0, 0.0, (float)texture.width, (float)texture.height },
-                transform_to_screen(element->rect()), { 0, 0 }, element->angle, RAYWHITE
+                transform_to_screen({ pos.x, pos.y, element->width, element->height }), { 0, 0 }, element->angle, RAYWHITE
             );
+            
+#ifdef EDITOR_DEBUG
+            DrawLine(midpoint.x, midpoint.y, midpoint.x + offset.x, midpoint.y + offset.y, GREEN);
+            DrawLine(midpoint.x, midpoint.y, midpoint.x + rotated.x, midpoint.y + rotated.y, BLUE);
+#endif 
         }
     }
 
@@ -234,6 +252,7 @@ void CanvasLayer::save_scene()
         {
             scene["SpriteElements"][element->name]["x"] = element->pos.x;
             scene["SpriteElements"][element->name]["y"] = element->pos.y;
+            scene["SpriteElements"][element->name]["angle"] = element->angle;
             scene["SpriteElements"][element->name]["layer"] = static_cast<int>(element->layer);
             scene["SpriteElements"][element->name]["asset_ref"] = element->handle;
             std::cout << std::format("Save with asset_ref: {}\n", element->handle);
@@ -260,7 +279,8 @@ void CanvasLayer::load_scene(const std::string& scene_name)
         constexpr auto ppu { 16 };
         auto sprite_element = std::make_shared<SpriteElement>();
         sprite_element->name = name;
-        sprite_element->pos = { (float)it.second["x"].as<int>(), (float)it.second["y"].as<int>() };
+        sprite_element->pos = { it.second["x"].as<float>(), it.second["y"].as<float>() };
+        sprite_element->angle = it.second["angle"].as<float>();
         Handle handle = it.second["asset_ref"].as<std::string>();
         Core::Asset asset = am->get_asset(handle);
         sprite_element->handle = handle; 

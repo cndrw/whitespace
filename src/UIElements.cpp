@@ -190,8 +190,38 @@ void UIComponent::set_rect(const Rectangle rect)
 }
 
 UITextBox::UITextBox()
+    : on_edited{[](){}}
 {
     render = [this] { render_impl(); };
+}
+
+// TODO: UITextbox sollte wissen ob sich der content geändert hat
+//       -> muss nicht on_edited() callen 
+bool UITextBox::process_input()
+{
+    bool click_processed = false;
+    if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
+    {
+        if (is_hovered())
+        {
+            on_click();
+            click_processed = true;
+        }
+        else if (m_edit_mode)
+        {
+            m_edit_mode = false;
+            on_edited();
+        }
+    }
+
+    // enter is not "processed", so canvas layer can update the sprite immediently
+    if (IsKeyPressed(KEY_ENTER))
+    {
+        m_edit_mode = false;
+        on_edited();
+    }
+    
+    return click_processed;
 }
 
 void UITextBox::on_click()
@@ -225,7 +255,18 @@ void UITextBox::set_text(const std::string &text)
     }
 }
 
+void UITextBox::set_static(bool status)
+{
+    m_draw_label = status;
+}
+
 void UITextBox::render_impl()
 {
+    if (m_draw_label)
+    {
+        GuiLabel(rect, m_buffer);
+        return;
+    }
+
     GuiTextBox(rect, m_buffer, MAX_BUFFER_SIZE, m_edit_mode);
 }

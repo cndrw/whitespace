@@ -2,15 +2,18 @@ SpriteElements:
   heart_333:
     x: 496
     y: 80
+    angle: 0
     layer: 0
     asset_ref: heart
   heart_1:
     x: 288
     y: 80
+    angle: 0
     layer: 0
     asset_ref: heart
   heart_45:
-    x: 784
-    y: 64
+    x: 704
+    y: 80
+    angle: 0
     layer: 0
     asset_ref: heart

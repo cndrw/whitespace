@@ -18,7 +18,6 @@ typedef struct
     std::string label;
     std::unique_ptr<UITextBox> text_box;
     Vec2 pos;
-    std::function<void()> on_edited;
 } LabeledTextBox;
 
 
@@ -54,7 +53,7 @@ private:
             m_labels[idx].text_box->set_text(std::to_string(field));
         }
 
-        m_labels[idx].on_edited = [this, &field, idx] { handle_edit(field, idx); };
+        m_labels[idx].text_box->on_edited = [this, &field, idx] { handle_edit(field, idx); };
     }
 
     template<typename T>

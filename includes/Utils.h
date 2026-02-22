@@ -35,9 +35,22 @@ public:
     {
         return { x + other.x, y + other.y };
     }
-    [[nodiscard]] constexpr Vec2 operator-(const Vec2& rhs) const;
+
+    [[nodiscard]] constexpr Vec2 operator+(Vec2&& other) const
+    {
+        return { x + other.x, y + other.y };
+    }
+
+    [[nodiscard]] constexpr Vec2 operator-(const Vec2& other) const
+    {
+        return { x - other.x, y - other.y };
+    }
+
     [[nodiscard]] constexpr Vec2 operator-(Vec2&& rhs) const;
-    [[nodiscard]] constexpr Vec2 operator-() const;
+    [[nodiscard]] constexpr Vec2 operator-() const
+    {
+        return {-this->x, -this->y};
+    }
     [[nodiscard]] inline constexpr operator Vector2() const { return Vector2{ x, y }; }
     friend std::ostream& operator<<(std::ostream& stream, const Vec2& v);
 

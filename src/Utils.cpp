@@ -23,12 +23,6 @@ constexpr Vec2 &Vec2::operator-=(const Vec2& other)
 }
 
 [[nodiscard]]
-constexpr Vec2 Vec2::operator-() const
-{
-    return {-this->x, -this->y};
-}
-
-[[nodiscard]]
 constexpr Vec2 Vec2::operator/(const double val) const
 {
     if (val == 0)
@@ -55,15 +49,6 @@ constexpr Vec2 Vec2::operator*(const float val) const
     Vec2 res = *this;
     res.x *= val;
     res.y *= val;
-    return res;
-}
-
-[[nodiscard]]
-constexpr Vec2 Vec2::operator-(const Vec2& other) const
-{
-    Vec2 res = *this;
-    res.x -= other.x;
-    res.y -= other.y;
     return res;
 }
 

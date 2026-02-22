@@ -61,20 +61,26 @@ public:
     UITextBox();
     virtual ~UITextBox() override = default;
 
+    bool process_input();
     void on_click();
     void cancel_edit();
     virtual bool is_hovered() override;
 
     void set_text(const std::string& text);
     std::string get_text() const { return std::string(m_buffer); };
+    void set_static(bool status);
 
 private:
     virtual void render_impl();
+
+public:
+    Callback on_edited;
 
 private:
     static constexpr auto MAX_BUFFER_SIZE { 20 };
     char m_buffer[MAX_BUFFER_SIZE];
     bool m_edit_mode = false;
+    bool m_draw_label = false;
 };
 
 class UIImageButton : public UIButton

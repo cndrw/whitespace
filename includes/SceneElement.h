@@ -5,11 +5,13 @@
 
 #include "raylib.h"
 
+#include "Utils.h"
+
 class SceneElement
 {
 public:
     std::string name;
-    Vector2 pos;
+    Vec2 pos;
 };
 
 

@@ -16,37 +16,19 @@ Inspector::Inspector()
 {
     for (auto& label : m_labels)
     {
-        label = { "", std::make_unique<UITextBox>(), Vec2{0, 0}, [](){} };
+        label = { "", std::make_unique<UITextBox>(), Vec2{0, 0} };
     }
 }
 
 bool Inspector::process_input()
 {
-    bool click_processed = false;
-    for (const auto& label : m_labels)
+    bool processed = false;
+    for (auto& label : m_labels)
     {
-        if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
-        {
-            if (label.text_box->is_hovered())
-            {
-                label.text_box->on_click();
-                click_processed = true;
-            }
-            else 
-            {
-                label.text_box->cancel_edit();
-                label.on_edited();
-            }
-        }
-
-        if (IsKeyPressed(KEY_ENTER))
-        {
-            label.text_box->cancel_edit();
-            label.on_edited();
-        }
+        processed = label.text_box->process_input() || processed;
     }
 
-    return CheckCollisionPointRec(GetMousePosition(), m_outer_rect) || click_processed;
+    return CheckCollisionPointRec(GetMousePosition(), m_outer_rect) || processed;
 }
 
 void Inspector::render_impl()
@@ -90,8 +72,9 @@ void Inspector::setup_labels(DisplayType disp_t)
         case DisplayType::SpriteElement:
         {
             set_label("Name:", 0, m_focused_sprite.name);
-            set_label("Y:", 1, m_focused_sprite.pos.x);
-            set_label("X:", 2, m_focused_sprite.pos.y);
+            m_labels[0].text_box->set_static(false);
+            set_label("X:", 1, m_focused_sprite.pos.x);
+            set_label("Y:", 2, m_focused_sprite.pos.y);
             set_label("Angle:", 3, m_focused_sprite.angle);
             set_label("Layer:", 4, m_focused_sprite.layer);
             m_label_count = 5;
@@ -100,6 +83,7 @@ void Inspector::setup_labels(DisplayType disp_t)
         case DisplayType::AssetElement:
         {
             set_label("Name:", 0, m_focused_asset.name);
+            m_labels[0].text_box->set_static(true);
             set_label("PPU:", 1, m_focused_asset.ppu);
             m_label_count = 2;
             break;
