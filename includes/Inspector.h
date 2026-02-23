@@ -65,6 +65,7 @@ private:
             switch (m_current_disp_t)
             {
                 case DisplayType::SpriteElement:
+                    std::cout << "update sprite layer " << (int)m_focused_sprite.layer << std::endl;
                     on_sprite_elem_changed.invoke(m_focused_sprite);
                     break;
 

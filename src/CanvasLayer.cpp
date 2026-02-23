@@ -59,18 +59,30 @@ void CanvasLayer::init()
         ->get_inspector()
         ->on_sprite_elem_changed.add_listener([this] (SpriteElement changed_elem)
         {
+            std::shared_ptr<SpriteElement> ref;
+            size_t index = 0; 
+            uint8_t layer_before = 0;
+
             for (auto& layer : m_sprite_elements | std::views::values)
             {
+                index = 0;
                 for (auto& elem : layer)
                 {
                     if (elem->get_id() == changed_elem.get_id())
                     {
+                        layer_before = elem->layer;
                         *elem = changed_elem;
+                        ref = elem;
                         break;
                     }
+                    index++;
                 }
             } 
 
+            // put sprite element in new layer
+            m_sprite_elements[ref->layer].push_back(ref);
+            auto& layer = m_sprite_elements[layer_before];
+            layer.erase(layer.begin() + index);
         });
 }
 
