@@ -7,19 +7,20 @@
 #include "UIElements.h"
 #include "AppLayer.h"
 
-class FunctionRibbon
+class FunctionRibbon : public UIComponent
 {
 public:
     FunctionRibbon();
     ~FunctionRibbon();
     bool process_input();
-    void render();
+    void render() override;
     UIButton* make_button(const Rectangle& rect, const char* label, const std::function<void()>& on_click);
     void update_ribbon(const ProjectMetadata& proj_data);
-    void set_rect(Rectangle rect);
+
+// protected:
+//     void render_impl() override;
 
 private:
-    Rectangle m_rect;
     Rectangle m_scene_static_label;
     std::vector<UIButton*> m_buttons; 
     std::vector<UIElement*> m_labels;

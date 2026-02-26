@@ -79,6 +79,7 @@ void CanvasLayer::init()
                 }
             } 
 
+            // TODO (maybe): if a layer has now elements (after it had some) -> it is not deleted from the map
             // put sprite element in new layer
             m_sprite_elements[ref->layer].push_back(ref);
             auto& layer = m_sprite_elements[layer_before];

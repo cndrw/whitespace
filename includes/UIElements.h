@@ -141,16 +141,16 @@ public:
     explicit UIComponent(const std::string& name)
         : m_name{name} {}
 
-    void render();
+    virtual void render();
     void set_rect(const Rectangle rect);
 
 protected:
-    virtual void render_impl() = 0;
+    virtual void render_impl() {};
 
 protected:
     Rectangle m_outer_rect, m_inner_rect;
+    static constexpr Color m_bg_color = { 242, 217, 191, 225 };
 
 private:
     std::string m_name;
-    static constexpr Color m_bg_color = { 242, 217, 191, 225 };
 };

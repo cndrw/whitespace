@@ -15,6 +15,7 @@
 #include "Utils.h"
 
 FunctionRibbon::FunctionRibbon()
+    : UIComponent{"Function Ribbon"}
 {
     m_scene_static_label = { 225, 0, 50, 20 };
     m_buttons = {
@@ -61,7 +62,7 @@ bool FunctionRibbon::process_input()
         }
     }
 
-    return CheckCollisionPointRec(mouse_pos, m_rect);
+    return CheckCollisionPointRec(mouse_pos, m_outer_rect);
         
 }
 
@@ -117,6 +118,7 @@ void FunctionRibbon::update_ribbon(const ProjectMetadata& proj_data)
 
 void FunctionRibbon::render()
 {
+    DrawRectangleRec(m_outer_rect, m_bg_color);
     for (const auto& button : m_buttons)
     {
         button->render();
@@ -129,7 +131,3 @@ void FunctionRibbon::render()
 }
 
 
-void FunctionRibbon::set_rect(Rectangle rect)
-{
-    m_rect = std::move(rect);
-}
