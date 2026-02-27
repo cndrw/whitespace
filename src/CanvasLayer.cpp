@@ -45,46 +45,44 @@ CanvasLayer::CanvasLayer()
 
 void CanvasLayer::init()
 {
-    Core::Application::get()
-        .get_layer<UILayer>()
-        ->get_asset_explorer()
-        ->add_scene_element.add_listener([this] (const auto& asset)
+    auto* ui_layer = Core::Application::get().get_layer<UILayer>();
+
+    ui_layer->get_component<AssetExplorer>()
+    ->add_scene_element.add_listener([this] (const auto& asset)
+    {
+        add_scene_element(asset);
+    });
+
+
+    ui_layer->get_component<Inspector>()
+    ->on_sprite_elem_changed.add_listener([this] (SpriteElement changed_elem)
+    {
+        std::shared_ptr<SpriteElement> ref;
+        size_t index = 0; 
+        uint8_t layer_before = 0;
+
+        for (auto& layer : m_sprite_elements | std::views::values)
         {
-            add_scene_element(asset);
-        });
-
-
-    Core::Application::get()
-        .get_layer<UILayer>()
-        ->get_inspector()
-        ->on_sprite_elem_changed.add_listener([this] (SpriteElement changed_elem)
-        {
-            std::shared_ptr<SpriteElement> ref;
-            size_t index = 0; 
-            uint8_t layer_before = 0;
-
-            for (auto& layer : m_sprite_elements | std::views::values)
+            index = 0;
+            for (auto& elem : layer)
             {
-                index = 0;
-                for (auto& elem : layer)
+                if (elem->get_id() == changed_elem.get_id())
                 {
-                    if (elem->get_id() == changed_elem.get_id())
-                    {
-                        layer_before = elem->layer;
-                        *elem = changed_elem;
-                        ref = elem;
-                        break;
-                    }
-                    index++;
+                    layer_before = elem->layer;
+                    *elem = changed_elem;
+                    ref = elem;
+                    break;
                 }
-            } 
+                index++;
+            }
+        } 
 
-            // TODO (maybe): if a layer has now elements (after it had some) -> it is not deleted from the map
-            // put sprite element in new layer
-            m_sprite_elements[ref->layer].push_back(ref);
-            auto& layer = m_sprite_elements[layer_before];
-            layer.erase(layer.begin() + index);
-        });
+        // TODO (maybe): if a layer has now elements (after it had some) -> it is not deleted from the map
+        // put sprite element in new layer
+        m_sprite_elements[ref->layer].push_back(ref);
+        auto& layer = m_sprite_elements[layer_before];
+        layer.erase(layer.begin() + index);
+    });
 }
 
 void CanvasLayer::add_scene_element(const Core::Asset& asset)
@@ -364,7 +362,12 @@ bool CanvasLayer::process_input()
         }
         else if (wheel_move.y != 0)
         {
-            m_scale += wheel_move.y * SCROLL_SPEED;
+            const float delta = m_scale  * wheel_move.y * SCROLL_SPEED;
+            if (std::fabs(m_scale + delta) >= 1e-5f)
+            {
+                m_scale += delta;
+            }
+            std::cout << m_scale << std::endl;
         }
 
         return false;

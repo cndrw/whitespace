@@ -19,8 +19,15 @@ public:
     virtual ~UILayer();
     void set_asset_root(std::filesystem::path path);
     
-    AssetExplorer* get_asset_explorer() { return &m_asset_explorer; } 
-    Inspector* get_inspector() { return &m_inspector; } 
+    template<typename T>
+    requires(std::derived_from<T, UIComponent>)
+    constexpr T* get_component()
+    {
+        if constexpr (std::is_same_v<T, AssetExplorer>) return &m_asset_explorer;
+        if constexpr (std::is_same_v<T, Inspector>) return &m_inspector;
+        if constexpr (std::is_same_v<T, FunctionRibbon>) return &m_func_ribbon;
+        return nullptr;
+    }
 
 private:
     std::vector<Rectangle> m_clickable_obj;
