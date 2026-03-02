@@ -26,7 +26,11 @@ public:
     [[nodiscard]] constexpr float len() const;
     [[nodiscard]] constexpr static float dist(Vec2 v1, Vec2 v2);
     [[nodiscard]] constexpr static float dot(Vec2 v1, Vec2 v2);
-    [[nodiscard]] constexpr Vec2 operator*(float val) const;
+    [[nodiscard]] constexpr Vec2 operator*(float val) const
+    {
+        return {x * val, y * val};
+    }
+
     [[nodiscard]] constexpr Vec2& operator+=(const Vec2& other);
     [[nodiscard]] constexpr Vec2& operator-=(const Vec2& other);
     [[nodiscard]] constexpr Vec2 operator/(double val) const;
@@ -46,7 +50,11 @@ public:
         return { x - other.x, y - other.y };
     }
 
-    [[nodiscard]] constexpr Vec2 operator-(Vec2&& rhs) const;
+    [[nodiscard]] constexpr Vec2 operator-(Vec2&& other) const
+    {
+        return {x - other.x, y - other.y};
+    }
+
     [[nodiscard]] constexpr Vec2 operator-() const
     {
         return {-this->x, -this->y};

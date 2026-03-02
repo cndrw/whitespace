@@ -37,11 +37,13 @@ private:
 
     // tmp functions
     Rectangle transform_to_screen(const Rectangle& rect);
+    Vec2 transform_to_screen(const Vec2& vec);
+    Vec2 transform_to_canvas(const Vec2& vec);
 
 private:
     std::map<uint8_t, std::vector<std::shared_ptr<SpriteElement>>> m_sprite_elements;
     std::shared_ptr<SpriteElement> m_focused_sprite_elem;
-    Vector2 m_sprite_drag_offset;
+    Vec2 m_sprite_drag_offset;
     Vector2 m_origin;
     float m_scale = 1;
 };

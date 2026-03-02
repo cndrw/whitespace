@@ -36,7 +36,33 @@ Rectangle CanvasLayer::transform_to_screen(const Rectangle& rect)
         .height = rect.height * m_scale
     };
 
-    return  res_rect;
+    return res_rect;
+}
+
+Vec2 CanvasLayer::transform_to_screen(const Vec2& vec)
+{
+    const auto offset = (Vector2) {
+        (float)GetScreenWidth() / 2,
+        (float)GetScreenHeight() / 2
+    };
+
+    return {
+        (vec.x + m_origin.x - offset.x) * m_scale + offset.x, 
+        (vec.y + m_origin.y - offset.y) * m_scale + offset.y
+    };
+}
+
+Vec2 CanvasLayer::transform_to_canvas(const Vec2& vec)
+{
+    const auto offset = (Vector2) {
+        (float)GetScreenWidth() / 2,
+        (float)GetScreenHeight() / 2
+    };
+
+   return {
+        ((vec.x - offset.x)  / m_scale) - m_origin.x + offset.x,
+        ((vec.y - offset.y)  / m_scale) - m_origin.y + offset.y
+    };
 }
 
 CanvasLayer::CanvasLayer()
@@ -188,8 +214,14 @@ void CanvasLayer::render()
                 { 0.0, 0.0, (float)texture.width, (float)texture.height },
                 transform_to_screen({ pos.x, pos.y, element->width, element->height }), { 0, 0 }, element->angle, RAYWHITE
             );
-            
+
 #ifdef EDITOR_DEBUG
+            DrawRectangleLinesEx(
+                transform_to_screen(element->rect()),
+                1,
+                MAGENTA
+            );
+            
             DrawLine(midpoint.x, midpoint.y, midpoint.x + offset.x, midpoint.y + offset.y, GREEN);
             DrawLine(midpoint.x, midpoint.y, midpoint.x + rotated.x, midpoint.y + rotated.y, BLUE);
 #endif 
@@ -214,7 +246,7 @@ std::shared_ptr<SpriteElement> CanvasLayer::determine_focused_element(const Vect
     {
         for (int i = elements.size() - 1; i >= 0; i--)
         {
-            if (CheckCollisionPointRec(cursor_pos, elements[i]->rect()))
+            if (CheckCollisionPointRec(cursor_pos, transform_to_screen(elements[i]->rect())))
             {
                 if (elements.size() > 1 && i != static_cast<int>(elements.size() - 1))
                 {
@@ -311,10 +343,10 @@ void CanvasLayer::draw_reference_resolution(const Vector2 res)
     const Rectangle ref_rect = { 0, 0, res.x, res.y };
     DrawRectangleLinesEx(transform_to_screen(ref_rect), 2, ORANGE);
     const std::string res_text = std::format("{}x{}", res.x, res.y);
-    constexpr auto padding { 5 };
+    constexpr auto padding { 3 };
     constexpr auto font_size { 25 };
     // TODO: why is it no working when i scale it with padding? (only works if applied after)
-    Rectangle ref_label = { m_origin.x + padding, m_origin.y - font_size - padding, 0, 0 };
+    Rectangle ref_label = { padding, -(font_size + padding)  / m_scale , 0, 0 };
     ref_label = transform_to_screen(ref_label);
     DrawText(
         res_text.c_str(),
@@ -343,7 +375,7 @@ bool CanvasLayer::process_input()
     {
         if ((m_focused_sprite_elem = determine_focused_element(cursor_pos)))
         {
-            m_sprite_drag_offset = Vector2Subtract(cursor_pos, m_focused_sprite_elem->pos);
+            m_sprite_drag_offset = cursor_pos - transform_to_screen(m_focused_sprite_elem->pos);
         }
     }
 
@@ -367,7 +399,6 @@ bool CanvasLayer::process_input()
             {
                 m_scale += delta;
             }
-            std::cout << m_scale << std::endl;
         }
 
         return false;
@@ -383,13 +414,13 @@ bool CanvasLayer::process_input()
 
     if (IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT))
     {
-        Vector2 pos = Vector2Subtract(cursor_pos, m_sprite_drag_offset);
+        Vec2 pos = cursor_pos - m_sprite_drag_offset;
         pos = {
             std::floor(pos.x / m_focused_sprite_elem->ppu) * m_focused_sprite_elem->ppu,
             std::floor(pos.y / m_focused_sprite_elem->ppu) * m_focused_sprite_elem->ppu
         }; 
         
-        m_focused_sprite_elem->pos = pos;
+        m_focused_sprite_elem->pos = transform_to_canvas(pos);
         on_element_changed.invoke(*m_focused_sprite_elem);
     }
 

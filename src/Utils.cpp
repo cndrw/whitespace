@@ -43,24 +43,6 @@ constexpr Vec2 Vec2::operator/(const float val) const
     return *this / static_cast<double>(val);
 }
 
-[[nodiscard]]
-constexpr Vec2 Vec2::operator*(const float val) const
-{
-    Vec2 res = *this;
-    res.x *= val;
-    res.y *= val;
-    return res;
-}
-
-[[nodiscard]]
-constexpr Vec2 Vec2::operator-(Vec2&& rhs) const
-{
-    Vec2 res = *this;
-    res.x -= rhs.x;
-    res.y -= rhs.y;
-    return res;
-}
-
 std::ostream& operator<<(std::ostream& stream, const Vec2& v)
 {
     stream << "x: " << v.x << " y: " << v.y << " ";
