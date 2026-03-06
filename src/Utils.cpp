@@ -7,14 +7,6 @@
 #include "Utils.h"
 
 [[nodiscard]]
-constexpr Vec2& Vec2::operator+=(const Vec2& other)
-{
-    this->x += other.x;
-    this->y += other.y;
-    return *this;
-}
-
-[[nodiscard]]
 constexpr Vec2 &Vec2::operator-=(const Vec2& other)
 {
     this->x -= other.x;

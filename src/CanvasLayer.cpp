@@ -128,6 +128,9 @@ void CanvasLayer::add_scene_element(const Core::Asset& asset)
     m_sprite_elements[0].push_back(sprite_element);
     m_focused_sprite_elem = m_sprite_elements[0].back();
     m_sprite_drag_offset = { m_focused_sprite_elem->width / 2, m_focused_sprite_elem->height / 2 };
+
+    std::cout << "inoke\n";
+    on_element_added.invoke(*sprite_element);
 }
 
 void CanvasLayer::remove_scene_element(const std::shared_ptr<SpriteElement>& element)
@@ -334,6 +337,23 @@ void CanvasLayer::load_scene(const std::string& scene_name)
         sprite_element->layer = 0;
 
         m_sprite_elements[0].push_back(sprite_element);
+        on_element_added.invoke(*sprite_element);
+    }
+}
+
+void CanvasLayer::focus_element(const uint16_t id)
+{
+    for (const auto& layers : m_sprite_elements | std::views::values)
+    {
+        for (const auto& element : layers)
+        {
+            if (element->get_id() == id)
+            {
+                m_focused_sprite_elem = element;
+                on_element_changed.invoke(*m_focused_sprite_elem);
+                return;
+            }
+        }
     }
 }
 
@@ -379,6 +399,15 @@ bool CanvasLayer::process_input()
         }
     }
 
+    if (wheel_move.y != 0)
+    {
+        const float delta = m_scale  * wheel_move.y * SCROLL_SPEED;
+        if (std::fabs(m_scale + delta) >= 1e-5f)
+        {
+            m_scale += delta;
+        }
+    }
+
     if (!m_focused_sprite_elem)
     {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
@@ -388,17 +417,7 @@ bool CanvasLayer::process_input()
 
         if (IsKeyDown(KEY_SPACE) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
         {
-            const Vector2 delta_pos = GetMouseDelta();
-            m_origin.x += delta_pos.x;
-            m_origin.y += delta_pos.y;
-        }
-        else if (wheel_move.y != 0)
-        {
-            const float delta = m_scale  * wheel_move.y * SCROLL_SPEED;
-            if (std::fabs(m_scale + delta) >= 1e-5f)
-            {
-                m_scale += delta;
-            }
+            m_origin += GetMouseDelta();
         }
 
         return false;
@@ -407,6 +426,8 @@ bool CanvasLayer::process_input()
     if (IsKeyPressed(KeyboardKey::KEY_DELETE))
     {
         remove_scene_element(m_focused_sprite_elem);
+        // TODO: should be in remove_scene_element but...
+        on_element_removed.invoke(*m_focused_sprite_elem);
         m_focused_sprite_elem = nullptr;
         on_element_changed.invoke(std::nullopt);
         return true;
@@ -414,13 +435,13 @@ bool CanvasLayer::process_input()
 
     if (IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT))
     {
-        Vec2 pos = cursor_pos - m_sprite_drag_offset;
+        Vec2 pos = transform_to_canvas(cursor_pos - m_sprite_drag_offset);
         pos = {
             std::floor(pos.x / m_focused_sprite_elem->ppu) * m_focused_sprite_elem->ppu,
             std::floor(pos.y / m_focused_sprite_elem->ppu) * m_focused_sprite_elem->ppu
         }; 
         
-        m_focused_sprite_elem->pos = transform_to_canvas(pos);
+        m_focused_sprite_elem->pos = pos;
         on_element_changed.invoke(*m_focused_sprite_elem);
     }
 

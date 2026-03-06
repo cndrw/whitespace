@@ -25,7 +25,11 @@ public:
     virtual ~CanvasLayer();
     void save_scene();
     void load_scene(const std::string& scene_name);
+    void focus_element(const uint16_t id);
+
     Core::Event<const std::optional<SpriteElement>&> on_element_changed;
+    Core::Event<const SpriteElement&> on_element_added;
+    Core::Event<const SpriteElement&> on_element_removed;
 
 private:
     std::shared_ptr<SpriteElement> determine_focused_element(const Vector2 cursor_pos);
@@ -44,6 +48,6 @@ private:
     std::map<uint8_t, std::vector<std::shared_ptr<SpriteElement>>> m_sprite_elements;
     std::shared_ptr<SpriteElement> m_focused_sprite_elem;
     Vec2 m_sprite_drag_offset;
-    Vector2 m_origin;
+    Vec2 m_origin;
     float m_scale = 1;
 };

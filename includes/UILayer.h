@@ -7,6 +7,7 @@
 #include "Inspector.h"
 #include "FunctionRibbon.h"
 #include "AssetExplorer.h"
+#include "Hierachy.h"
 
 class UILayer : public Core::Layer
 {
@@ -26,6 +27,7 @@ public:
         if constexpr (std::is_same_v<T, AssetExplorer>) return &m_asset_explorer;
         if constexpr (std::is_same_v<T, Inspector>) return &m_inspector;
         if constexpr (std::is_same_v<T, FunctionRibbon>) return &m_func_ribbon;
+        if constexpr (std::is_same_v<T, Hierachy>) return &m_hierachy;
         return nullptr;
     }
 
@@ -34,4 +36,5 @@ private:
     Inspector m_inspector;
     AssetExplorer m_asset_explorer;
     FunctionRibbon m_func_ribbon;
+    Hierachy m_hierachy;
 };

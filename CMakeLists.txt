@@ -47,6 +47,7 @@ add_library(${PROJECT_NAME}_lib STATIC src/Application.cpp
                                        src/AppLayer.cpp
                                        src/UIElements.cpp
                                        src/Utils.cpp
+                                       src/Hierachy.cpp
 )
 
 # add an executabel and assign files to it
