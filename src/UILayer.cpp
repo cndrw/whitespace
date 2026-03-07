@@ -53,6 +53,11 @@ void UILayer::init()
         m_hierachy.remove_entry(e);
     });
 
+    canvas_layer->on_element_name_changed.add_listener([this] (const auto& b, const auto& a)
+    {
+        m_hierachy.update_name(b, a);
+    });
+
     m_hierachy.on_element_selected.add_listener([this, canvas_layer] (const uint16_t id)
     {
         canvas_layer->focus_element(id);

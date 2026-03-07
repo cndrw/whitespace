@@ -16,6 +16,7 @@ public:
     bool process_input();
     void add_entry(const SpriteElement& elem);
     void remove_entry(const SpriteElement& elem);
+    void update_name(const std::string_view before, const std::string_view after);
 
     Core::Event<const uint16_t> on_element_selected;
 

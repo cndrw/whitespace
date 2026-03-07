@@ -30,6 +30,8 @@ public:
     Core::Event<const std::optional<SpriteElement>&> on_element_changed;
     Core::Event<const SpriteElement&> on_element_added;
     Core::Event<const SpriteElement&> on_element_removed;
+    // there's probably a way to do this
+    Core::Event<const std::string_view, const std::string_view> on_element_name_changed;
 
 private:
     std::shared_ptr<SpriteElement> determine_focused_element(const Vector2 cursor_pos);

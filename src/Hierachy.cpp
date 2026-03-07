@@ -57,6 +57,18 @@ void Hierachy::remove_entry(const SpriteElement& elem)
    arrange_entries();
 }
 
+void Hierachy::update_name(const std::string_view before, const std::string_view after)
+{
+    for (auto& entry : m_entries)
+    {
+        if (entry->text == before)
+        {
+            entry->text = after;
+            return;
+        }
+    }
+}
+
 bool Hierachy::process_input()
 {
     for (const auto& entry : m_entries)

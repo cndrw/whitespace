@@ -94,6 +94,10 @@ void CanvasLayer::init()
             {
                 if (elem->get_id() == changed_elem.get_id())
                 {
+                    if (elem->name != changed_elem.name)
+                    {
+                        on_element_name_changed.invoke(elem->name, changed_elem.name);
+                    }
                     layer_before = elem->layer;
                     *elem = changed_elem;
                     ref = elem;
@@ -129,7 +133,6 @@ void CanvasLayer::add_scene_element(const Core::Asset& asset)
     m_focused_sprite_elem = m_sprite_elements[0].back();
     m_sprite_drag_offset = { m_focused_sprite_elem->width / 2, m_focused_sprite_elem->height / 2 };
 
-    std::cout << "inoke\n";
     on_element_added.invoke(*sprite_element);
 }
 
