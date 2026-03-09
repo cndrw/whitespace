@@ -147,13 +147,15 @@ public:
     void update_entry(const std::string_view before, const std::string_view after);
 
 private:
-    Rectangle get_entry_rect(uint16_t pos) const;
-    void arrange_entries();
+    Rectangle get_new_rect() const;
+    void render_impl() const;
 
 private:
     // when UIButton is rid of this horrendous internal [this] capture 
     // the ptr should be be able to be droppped...
-    std::vector<std::unique_ptr<UIButton>> m_entries;
+    // also UIButton maybe manages hiw own state "active"?
+    struct Entry { bool active; std::unique_ptr<UIButton> button; };
+    std::vector<Entry> m_entries;
 };
 
 class UIComponent

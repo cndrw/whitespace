@@ -1,10 +1,6 @@
 #include "Hierachy.h"
 
-#include <iostream>
-#include <memory>
 #include <algorithm>
-
-#include "raygui.h"
 
 
 Hierachy::Hierachy()

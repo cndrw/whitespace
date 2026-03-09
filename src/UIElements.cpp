@@ -277,65 +277,104 @@ void UITextBox::render_impl()
 UIScrollView::UIScrollView()
 {
     // yuck... abomination (TODO)
-    render = [this] { std::ranges::for_each(m_entries, [] (const auto& entry) { entry->render(); }); };
+    render = [this] { render_impl(); };
 }
 
-Rectangle UIScrollView::get_entry_rect(const uint16_t pos) const
+Rectangle UIScrollView::get_new_rect() const
 {
-    static constexpr auto padding_between { 5 };
-    static constexpr auto padding_left { 5 };
-    static constexpr auto height { 15 };
+    static constexpr auto padding_between   { 5 };
+    static constexpr auto padding_left      { 5 };
+    static constexpr auto height            { 15 };
 
-    return {
-        rect.x + padding_left, rect.y + 2 + pos * height + padding_between,
-        rect.width, height
-    };
-}
-
-void UIScrollView::arrange_entries()
-{
-    for (size_t i = 0; i < m_entries.size(); i++)
+    if (m_entries.empty())
     {
-        m_entries[i]->rect = get_entry_rect(i);
+        return {
+            rect.x + padding_left, rect.y + padding_between + 2,
+            rect.width, height
+        };
     }
+
+    Rectangle last_rect = m_entries.back().button->rect;
+    last_rect.y += last_rect.height;
+
+    return last_rect;
 }
 
 void UIScrollView::add_entry(const SpriteElement& elem, Callback on_click)
 {
-    m_entries.push_back(std::make_unique<UIButton>(
-        get_entry_rect(m_entries.size()),
-        on_click,
-        elem.name
-    ));
+    m_entries.push_back({
+        .active = true, 
+        .button = std::make_unique<UIButton>(
+            get_new_rect(),
+            on_click,
+            elem.name
+    )});
 }
 
 void UIScrollView::remove_entry(const SpriteElement& elem)
 {
-    m_entries.erase(std::ranges::find_if(m_entries, [&elem] (auto& e) { return elem.name == e->text; }));
-    arrange_entries();
+    auto start = std::ranges::find_if(m_entries, [&elem] (auto& e) { return elem.name == e.button->text; });
+
+    if (start == m_entries.end())
+    {
+        return;
+    }
+
+    for (auto it = std::prev(m_entries.end()); it != start; it--)
+    {
+        auto prev = std::prev(it);
+        it->button->rect.y = prev->button->rect.y;
+    }
+
+    m_entries.erase(start);
 }
 
 void UIScrollView::update_entry(const std::string_view before, const std::string_view after)
 {
-    for (auto& entry : m_entries)
+    for (auto& [_, button] : m_entries)
     {
-        if (entry->text == before)
+        if (button->text == before)
         {
-            entry->text = after;
+            button->text = after;
             return;
+        }
+    }
+}
+
+void UIScrollView::render_impl() const
+{
+    for (const auto& [active, button] : m_entries)
+    {
+        if (active)
+        {
+            button->render();
         }
     }
 }
 
 bool UIScrollView::process_input()
 {
-    for (const auto& entry : m_entries)
+    if (CheckCollisionPointRec(GetMousePosition(), rect))
     {
-        if (entry->is_hovered())
+        // TODO: should probably be a modifiable variable of UIScrollView
+        static constexpr auto SCROLL_SPEED { 10 };
+        const float scroll_y = GetMouseWheelMoveV().y;
+        for (auto& entry : m_entries)
+        {
+            auto& r = entry.button->rect;
+            r.y += scroll_y * SCROLL_SPEED;
+            // active if within defined rect
+            entry.active = r.y + r.height <= rect.y + rect.height && r.y > rect.y;
+        }
+    }
+
+    for (const auto& [active, button] : m_entries)
+    {
+        if (active && button->is_hovered())
         {
             if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
             {
-                entry->on_click();
+                button->on_click();
                 return true;
             }
         }
