@@ -1,10 +1,13 @@
 #include <vector>
+#include <ranges>
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <cstring>
 #include <memory>
 
 #include "UIElements.h"
+#include "SceneElement.h"
 
 #include "raylib.h"
 #include "raygui.h"
@@ -269,4 +272,74 @@ void UITextBox::render_impl()
     }
 
     GuiTextBox(rect, m_buffer, MAX_BUFFER_SIZE, m_edit_mode);
+}
+
+UIScrollView::UIScrollView()
+{
+    // yuck... abomination (TODO)
+    render = [this] { std::ranges::for_each(m_entries, [] (const auto& entry) { entry->render(); }); };
+}
+
+Rectangle UIScrollView::get_entry_rect(const uint16_t pos) const
+{
+    static constexpr auto padding_between { 5 };
+    static constexpr auto padding_left { 5 };
+    static constexpr auto height { 15 };
+
+    return {
+        rect.x + padding_left, rect.y + 2 + pos * height + padding_between,
+        rect.width, height
+    };
+}
+
+void UIScrollView::arrange_entries()
+{
+    for (size_t i = 0; i < m_entries.size(); i++)
+    {
+        m_entries[i]->rect = get_entry_rect(i);
+    }
+}
+
+void UIScrollView::add_entry(const SpriteElement& elem, Callback on_click)
+{
+    m_entries.push_back(std::make_unique<UIButton>(
+        get_entry_rect(m_entries.size()),
+        on_click,
+        elem.name
+    ));
+}
+
+void UIScrollView::remove_entry(const SpriteElement& elem)
+{
+    m_entries.erase(std::ranges::find_if(m_entries, [&elem] (auto& e) { return elem.name == e->text; }));
+    arrange_entries();
+}
+
+void UIScrollView::update_entry(const std::string_view before, const std::string_view after)
+{
+    for (auto& entry : m_entries)
+    {
+        if (entry->text == before)
+        {
+            entry->text = after;
+            return;
+        }
+    }
+}
+
+bool UIScrollView::process_input()
+{
+    for (const auto& entry : m_entries)
+    {
+        if (entry->is_hovered())
+        {
+            if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
+            {
+                entry->on_click();
+                return true;
+            }
+        }
+    }
+
+    return CheckCollisionPointRec(GetMousePosition(), rect);
 }

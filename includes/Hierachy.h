@@ -11,7 +11,7 @@ class Hierachy : public UIComponent
 {
 public:
     Hierachy();
-    ~Hierachy();
+    ~Hierachy() = default;
 
     bool process_input();
     void add_entry(const SpriteElement& elem);
@@ -24,9 +24,10 @@ protected:
     void render_impl() override;
 
 private:
-    Rectangle get_entry_rect(uint16_t pos) const;
-    void arrange_entries();
+    // Rectangle get_entry_rect(uint16_t pos) const;
+    // void arrange_entries();
 
 private:
-    std::vector<UIButton*> m_entries;
+    // std::vector<UIButton*> m_entries;
+    UIScrollView m_scroll_view;
 };
