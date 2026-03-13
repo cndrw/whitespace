@@ -87,9 +87,17 @@ void UILayer::set_asset_root(std::filesystem::path path)
 
 bool UILayer::process_input()
 {
-    bool res = m_asset_explorer.process_input() ||
-               m_func_ribbon.process_input()    ||
-               m_inspector.process_input()      ||
-               m_hierachy.process_input();
-    return res;
+    // bool res = m_asset_explorer.process_input() ||
+    //            m_func_ribbon.process_input()    ||
+    //            m_inspector.process_input()      ||
+    //            m_hierachy.process_input();
+
+    bool res1 = m_asset_explorer.process_input();
+    bool res2 = m_func_ribbon.process_input();
+    bool res3 = m_inspector.process_input();
+    bool res4 = m_hierachy.process_input();
+
+    // std::cout << std::format("{} {} {} {}\n", res1, res2, res3, res4);
+
+    return res1 || res2 || res3 || res4; 
 }

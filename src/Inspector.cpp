@@ -6,7 +6,6 @@
 #include "Inspector.h"
 #include "SceneElement.h"
 #include "UIElements.h"
-// #define EDITOR_DEBUG
 #include "Utils.h"
 
 

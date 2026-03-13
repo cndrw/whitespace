@@ -11,7 +11,11 @@ Hierachy::Hierachy()
 void Hierachy::add_entry(const SpriteElement& elem)
 {
     // TODO: rect should be said when initializing... but current impl with set_rect is difficult
-    m_scroll_view.rect = m_inner_rect;
+    static constexpr auto padding { 10 }; 
+    const auto& ir = m_inner_rect;
+    Rectangle scroll_view_rect = { ir.x, ir.y + padding, ir.width, ir.height - padding*2 };
+
+    m_scroll_view.rect = scroll_view_rect;
     m_scroll_view.add_entry(elem, [this, id = elem.get_id()] { on_element_selected.invoke(id); });
 }
 
@@ -27,7 +31,7 @@ void Hierachy::update_name(const std::string_view before, const std::string_view
 
 bool Hierachy::process_input()
 {
-    return m_scroll_view.process_input() || CheckCollisionPointRec(GetMousePosition(), m_outer_rect);
+    return (m_scroll_view.process_input() || CheckCollisionPointRec(GetMousePosition(), m_outer_rect)) && !IsKeyPressed(KEY_DELETE);
 }
 
 void Hierachy::render_impl()

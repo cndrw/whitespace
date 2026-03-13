@@ -139,12 +139,17 @@ private:
 
 class UIScrollView : public UIElement
 {
+
+struct Entry { bool active; std::unique_ptr<UIButton> button; };
+
 public:
     UIScrollView();
     bool process_input();
     void add_entry(const SpriteElement& elem, Callback on_click);
     void remove_entry(const SpriteElement& elem);
     void update_entry(const std::string_view before, const std::string_view after);
+    void handle_scrolling();
+    bool check_if_in_view(const Entry& entry) const;
 
 private:
     Rectangle get_new_rect() const;
@@ -154,7 +159,6 @@ private:
     // when UIButton is rid of this horrendous internal [this] capture 
     // the ptr should be be able to be droppped...
     // also UIButton maybe manages hiw own state "active"?
-    struct Entry { bool active; std::unique_ptr<UIButton> button; };
     std::vector<Entry> m_entries;
 };
 

@@ -2,12 +2,14 @@
 #include <ranges>
 #include <algorithm>
 #include <iostream>
+#include <format>
 #include <string>
 #include <cstring>
 #include <memory>
 
 #include "UIElements.h"
 #include "SceneElement.h"
+#include "Utils.h"
 
 #include "raylib.h"
 #include "raygui.h"
@@ -309,6 +311,8 @@ void UIScrollView::add_entry(const SpriteElement& elem, Callback on_click)
             on_click,
             elem.name
     )});
+
+    m_entries.back().active = check_if_in_view(m_entries.back());
 }
 
 void UIScrollView::remove_entry(const SpriteElement& elem)
@@ -343,6 +347,8 @@ void UIScrollView::update_entry(const std::string_view before, const std::string
 
 void UIScrollView::render_impl() const
 {
+    DRAW_DEBUG_RECTANGLE(rect, BLUE);
+
     for (const auto& [active, button] : m_entries)
     {
         if (active)
@@ -354,19 +360,7 @@ void UIScrollView::render_impl() const
 
 bool UIScrollView::process_input()
 {
-    if (CheckCollisionPointRec(GetMousePosition(), rect))
-    {
-        // TODO: should probably be a modifiable variable of UIScrollView
-        static constexpr auto SCROLL_SPEED { 10 };
-        const float scroll_y = GetMouseWheelMoveV().y;
-        for (auto& entry : m_entries)
-        {
-            auto& r = entry.button->rect;
-            r.y += scroll_y * SCROLL_SPEED;
-            // active if within defined rect
-            entry.active = r.y + r.height <= rect.y + rect.height && r.y > rect.y;
-        }
-    }
+    handle_scrolling();
 
     for (const auto& [active, button] : m_entries)
     {
@@ -381,4 +375,40 @@ bool UIScrollView::process_input()
     }
 
     return CheckCollisionPointRec(GetMousePosition(), rect);
+}
+
+void UIScrollView::handle_scrolling()
+{
+    static constexpr auto SCROLL_SPEED { 10 };
+    float scroll_y = 0;
+
+    if (CheckCollisionPointRec(GetMousePosition(), rect))
+    {
+        scroll_y = GetMouseWheelMoveV().y;
+    }
+
+    if (!m_entries.empty())
+    {
+        int8_t sign = 0;
+        if (scroll_y > 0 && m_entries.front().button->rect.y < rect.y)
+        {
+            sign = 1;
+        }
+        else if (scroll_y < 0 && m_entries.back().button->rect.y + m_entries.back().button->rect.height > rect.y + rect.height)
+        {
+            sign = -1;
+        }
+
+        for (auto& entry : m_entries)
+        {
+            entry.button->rect.y += sign * SCROLL_SPEED;
+            entry.active = check_if_in_view(entry);
+        }
+    }
+}
+
+bool UIScrollView::check_if_in_view(const Entry& entry) const
+{
+    auto& r = entry.button->rect;
+    return r.y + r.height <= rect.y + rect.height && r.y > rect.y;
 }
