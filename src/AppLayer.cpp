@@ -32,6 +32,7 @@ void AppLayer::open_project()
 
 void AppLayer::load_scene(const std::string& scene_name)
 {
+    Core::Application::get().get_layer<UILayer>()->get_component<Hierachy>()->clear_all();
     auto* c_layer = Core::Application::get().get_layer<CanvasLayer>();
     c_layer->save_scene();
     c_layer->load_scene(std::string{scene_name} += ".yaml");

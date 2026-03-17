@@ -150,6 +150,7 @@ public:
     void update_entry(const std::string_view before, const std::string_view after);
     void handle_scrolling();
     bool check_if_in_view(const Entry& entry) const;
+    void clear();
 
 private:
     Rectangle get_new_rect() const;

@@ -1,16 +1,4 @@
 SpriteElements:
-  smiley_1:
-    x: 416
-    y: 208
-    angle: 0
-    layer: 0
-    asset_ref: smiley
-  heart_3:
-    x: 544
-    y: 112
-    angle: 0
-    layer: 0
-    asset_ref: heart
   heart_4:
     x: 320
     y: 112

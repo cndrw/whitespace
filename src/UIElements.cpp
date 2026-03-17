@@ -412,3 +412,8 @@ bool UIScrollView::check_if_in_view(const Entry& entry) const
     auto& r = entry.button->rect;
     return r.y + r.height <= rect.y + rect.height && r.y > rect.y;
 }
+
+void UIScrollView::clear()
+{
+    m_entries.clear();
+}

@@ -24,6 +24,11 @@ void Hierachy::remove_entry(const SpriteElement& elem)
     m_scroll_view.remove_entry(elem);
 }
 
+void Hierachy::clear_all()
+{
+   m_scroll_view.clear();
+}
+
 void Hierachy::update_name(const std::string_view before, const std::string_view after)
 {
     m_scroll_view.update_entry(before, after);

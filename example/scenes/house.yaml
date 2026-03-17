@@ -5,15 +5,15 @@ SpriteElements:
     angle: 9.367362e-39
     layer: 0
     asset_ref: heart
-  heart_2:
-    x: 464
-    y: 160
-    angle: 0
-    layer: 0
-    asset_ref: heart
   heart_3:
     x: 656
     y: 160
     angle: 60
+    layer: 0
+    asset_ref: heart
+  heart_2:
+    x: 432
+    y: 160
+    angle: 0
     layer: 0
     asset_ref: heart
