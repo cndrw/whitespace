@@ -216,15 +216,18 @@ void AssetExplorer::draw_asset_label(const Rectangle& preview_rect, const char* 
 
         const int gui_txt_size = GuiGetStyle(DEFAULT, TEXT_SIZE);
         const int gui_txt_spacing = GuiGetStyle(DEFAULT, TEXT_SPACING);
+        const Font font = GuiGetFont();
 
-        const auto ellipsis_len = MeasureTextEx(GuiGetFont(), "..", gui_txt_size, gui_txt_spacing).x;
+        const auto ellipsis_len = MeasureTextEx(font, "..", gui_txt_size, gui_txt_spacing).x;
         while (text_width < label_rect.width - ellipsis_len)
         {
             trunc_text += text[idx];
-            text_width = MeasureTextEx(GuiGetFont(), trunc_text.c_str(), gui_txt_size, gui_txt_spacing).x;
+            text_width = MeasureTextEx(font, trunc_text.c_str(), gui_txt_size, gui_txt_spacing).x;
             idx++;
         }
+        trunc_text.pop_back();
         trunc_text += "..";
+
         // DRAW_DEBUG_RECTANGLE(label_rect, BLUE);      
         GuiLabel(label_rect, trunc_text.c_str());
     }
