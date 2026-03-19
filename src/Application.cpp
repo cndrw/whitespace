@@ -16,7 +16,7 @@
 namespace Core
 {
     constexpr auto WINDOW_WIDTH { 1280 };
-    constexpr auto WINDOW_HEIGHT { 720 };
+    constexpr auto WINDOW_HEIGHT { 920 };
 
     static Application* s_application = nullptr;
 

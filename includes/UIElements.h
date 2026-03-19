@@ -19,9 +19,12 @@ public:
     UIElement(const Rectangle& rect, Callback render)
         : rect(rect), render(render) {}
 
+    inline void set_pos(const Vec2& pos) { rect.x = pos.x; rect.y = pos.y; }
+
     virtual ~UIElement() = default;
 
     virtual bool is_hovered() { return true; }
+
 
 public:
     Rectangle rect;

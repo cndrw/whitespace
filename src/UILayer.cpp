@@ -15,7 +15,7 @@
 UILayer::UILayer()
 {
     m_inspector.set_rect({(float)GetScreenWidth() - 200 - 20, 30, 200, 300});
-    m_asset_explorer.set_rect((Rectangle) {100, (float)GetScreenHeight() - 200, 500, 180});
+    m_asset_explorer.set_rect((Rectangle) {100, (float)GetScreenHeight() - 300, 1050, 280});
     m_func_ribbon.set_rect((Rectangle) {0, 0, (float)GetScreenWidth(), 20});
     m_hierachy.set_rect({10, 30, 150, 400});
     m_clickable_obj.push_back(m_inspector.get_rect());

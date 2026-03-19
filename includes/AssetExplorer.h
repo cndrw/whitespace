@@ -16,7 +16,13 @@
 class AssetExplorer : public UIComponent
 {
 public:
-    using AssetPreview = std::pair<std::unique_ptr<UIImageButton>, std::string>;
+    struct AssetPreview
+    {
+        std::unique_ptr<UIImageButton> button;
+        std::string label;
+        bool active;
+    };
+
     AssetExplorer() : UIComponent{"Asset Explorer"} {} 
     void set_root_dir(const std::filesystem::path& root);
     bool process_input();
@@ -41,11 +47,17 @@ private:
     void draw_asset_previews() const;
     void draw_drag_action_indicator() const;
 
+    void generate_layout();
+    std::vector<Vec2> generate_layout_template(float preview_size, size_t size) const;
+    void handle_scrolling();
+    bool check_if_in_view(const AssetPreview& entry) const;
+
 private:
     std::vector<std::unique_ptr<UIButton>> m_ptrace_labels;
     std::vector<AssetPreview> m_asset_prevs;
     std::filesystem::path m_current_directory;
     std::filesystem::path m_root;
     std::string m_selected_preview;
+    Rectangle m_asset_prev_rect;
     bool m_drag_action = false;
 };

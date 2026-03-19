@@ -6,7 +6,6 @@
 
 #include "Application.h"
 #include "AssetExplorer.h"
-// #define EDITOR_DEBUG
 #include "Utils.h"
 
 // static unsigned char FOLDER_ICON[] = {
@@ -33,13 +32,13 @@ Texture2D FOLDER_TEXTURE;
 
 AssetExplorer::AssetPreview AssetExplorer::make_dir_preview(const std::filesystem::path& dir)
 {
-    return AssetExplorer::AssetPreview(std::make_unique<UIImageButton>(
-        FOLDER_TEXTURE,
-        [this, dir]() {
-            open_asset_directory(dir);
-        }),
-        dir.stem().string()
-    );
+    return AssetPreview{
+        .button = std::make_unique<UIImageButton>(
+            FOLDER_TEXTURE,
+            [this, dir] { open_asset_directory(dir); }),
+        .label = dir.stem().string(),
+        .active = false
+    };
 }
 
 AssetExplorer::AssetPreview AssetExplorer::make_asset_preview(const std::filesystem::path& file)
@@ -47,15 +46,17 @@ AssetExplorer::AssetPreview AssetExplorer::make_asset_preview(const std::filesys
     const auto* am = Core::Application::get().get_asset_manager();
     const auto handle = file.stem().string();
 
-    return AssetExplorer::AssetPreview(std::make_unique<UIImageButton>(
-        am->get_asset(handle).texture,
-        [this, handle, am]() {
-            on_asset_prev_clicked.invoke(am->get_asset(handle));
-            m_selected_preview = handle; 
-            m_drag_action = true;
-        }),
-        file.stem().string()
-    );
+    return AssetPreview{
+        .button = std::make_unique<UIImageButton>(
+            am->get_asset(handle).texture,
+            [this, handle, am] {
+                on_asset_prev_clicked.invoke(am->get_asset(handle));
+                m_selected_preview = handle; 
+                m_drag_action = true;
+            }),
+        .label = file.stem().string(),
+        .active = false
+    };
 }
 
 // TODO: kann man den root_dir nicht mit im constructor setzen? sollte da schon bekannt sein
@@ -65,6 +66,17 @@ void AssetExplorer::set_root_dir(const std::filesystem::path& root)
     m_root = root;
     // TODO: just temporary, should be embedded
     FOLDER_TEXTURE = LoadTexture(R"(D:\Mein stuff\Ordner\Privat\Projects\whitespace\example\assets\folder_icon.png)");
+
+    // TOOD: should also not be here, tbd when initialization is reworked for UIComponents
+    static constexpr auto margin_top   { 50 };
+    static constexpr auto margin_left  { 10 };
+
+    m_asset_prev_rect = m_inner_rect;
+    m_asset_prev_rect.y += margin_top;
+    m_asset_prev_rect.x += margin_left;
+    m_asset_prev_rect.height -= margin_top + margin_left;
+    m_asset_prev_rect.width -= margin_left * 2;
+
     open_asset_directory(root);
 }
 
@@ -106,15 +118,20 @@ void AssetExplorer::render_impl()
         return;
     }
 
+    DRAW_DEBUG_RECTANGLE(m_asset_prev_rect, BLUE);
+
     draw_asset_previews();
     draw_path_trace();
     draw_drag_action_indicator();
+
 }
 
 bool AssetExplorer::process_input()
 {
     const Vec2 mpos = GetMousePosition();
     const bool left_clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+
+    handle_scrolling();
 
     if (m_drag_action && !CheckCollisionPointRec(mpos, m_outer_rect))
     {
@@ -131,15 +148,15 @@ bool AssetExplorer::process_input()
 
     if (!m_drag_action)
     {
-        for (const auto& btn : m_asset_prevs | std::views::keys)
+        for (const auto& prev : m_asset_prevs)
         {
-            btn->show_bg = false;
-            if (btn->is_hovered())
+            prev.button->show_bg = false;
+            if (prev.button->is_hovered())
             {
-                btn->show_bg = true;
+                prev.button->show_bg = true;
                 if (left_clicked)
                 {
-                    btn->on_click();
+                    prev.button->on_click();
                     return true;
                 }
             }
@@ -262,16 +279,13 @@ void AssetExplorer::draw_path_trace()
 
 void AssetExplorer::draw_asset_previews() const
 {
-    int idx = 0;
-    constexpr float preview_size = 80.f;
-    constexpr float padding = 10.f;
-
-    for (const auto& [btn, label] : m_asset_prevs)
+    for (const auto& prev : m_asset_prevs)
     {
-        const auto rect = place_preview_rect(idx++, preview_size, padding);
-        btn->rect = rect;
-        btn->render();
-        draw_asset_label(btn->rect, label.c_str(), btn->rect.width);
+        if (prev.active)
+        {
+            prev.button->render();
+            draw_asset_label(prev.button->rect, prev.label.c_str(), prev.button->rect.width);
+        }
     }
 }
 
@@ -292,6 +306,93 @@ void AssetExplorer::draw_drag_action_indicator() const
     DrawRectangleLinesEx(rect, 1.0f, RAYWHITE);
 }
 
+void AssetExplorer::generate_layout()
+{
+    static constexpr auto preview_size { 80 };
+
+    std::vector<Vec2> layout = generate_layout_template(preview_size, m_asset_prevs.size());
+    int idx = 0;
+
+    for (auto& prev : m_asset_prevs)
+    {
+        prev.button->set_pos(layout[idx++]);
+        prev.button->rect.height = preview_size;
+        prev.button->rect.width = preview_size;
+        prev.active = check_if_in_view(prev);
+    }
+}
+
+std::vector<Vec2> AssetExplorer::generate_layout_template(const float preview_size, const size_t size) const
+{
+    std::vector<Vec2> output;
+    output.reserve(size);
+
+    static constexpr auto padding { 22 };
+
+    int x_idx = 0;
+    int y_idx = 0;
+
+    const float step = preview_size + padding;
+
+    for (size_t i = 0; i < size; i++)
+    {
+        const float x_pos = m_asset_prev_rect.x + x_idx * step;
+
+        if (x_pos / (m_asset_prev_rect.x + m_asset_prev_rect.width - preview_size) > 1)
+        {
+            x_idx = 0;
+            y_idx++;
+        }
+
+        output.push_back({
+            m_asset_prev_rect.x + x_idx * step,
+            m_asset_prev_rect.y + y_idx * step
+        });
+
+        x_idx++;
+    }
+
+    return output;
+}
+
+void AssetExplorer::handle_scrolling()
+{
+    static constexpr auto SCROLL_SPEED { 10 };
+    static constexpr auto LABEL_HEIGHT { 15 }; // TODO: sollte auch nicht hier sein
+    static constexpr auto SPACING { 5 };       // TODO: sollte auch nicht hier sein
+    float scroll_y = 0;
+
+    if (CheckCollisionPointRec(GetMousePosition(), m_asset_prev_rect))
+    {
+        scroll_y = GetMouseWheelMoveV().y;
+    }
+
+    if (!m_asset_prevs.empty())
+    {
+        int8_t sign = 0;
+        if (scroll_y > 0 && m_asset_prevs.front().button->rect.y < m_asset_prev_rect.y)
+        {
+            sign = 1;
+        }
+        else if (scroll_y < 0 && m_asset_prevs.back().button->rect.y + m_asset_prevs.back().button->rect.height + LABEL_HEIGHT + SPACING > m_asset_prev_rect.y + m_asset_prev_rect.height)
+        {
+            sign = -1;
+        }
+
+        for (auto& prev : m_asset_prevs)
+        {
+            prev.button->rect.y += sign * SCROLL_SPEED;
+            prev.active = check_if_in_view(prev);
+        }
+    }
+}
+
+bool AssetExplorer::check_if_in_view(const AssetPreview &entry) const
+{
+    auto& r = entry.button->rect;
+    return r.y + r.height <= m_asset_prev_rect.y + m_asset_prev_rect.height && r.y >= m_asset_prev_rect.y;
+}
+
 std::unique_ptr<UIButton> AssetExplorer::make_path_trace_label(const std::filesystem::path& path)
 {
     return std::make_unique<UIButton>(
@@ -309,6 +410,8 @@ void AssetExplorer::open_asset_directory(std::filesystem::path dir)
 {
     m_current_directory = dir;
     build_explorer_view(m_current_directory);
+
+    generate_layout();
 
     // update path trace
     std::filesystem::path trace = m_current_directory;
