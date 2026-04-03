@@ -7,6 +7,8 @@
 #include <cstring>
 #include <memory>
 
+#include "Application.h"
+#include "AppLayer.h"
 #include "UIElements.h"
 #include "SceneElement.h"
 #include "Utils.h"
@@ -28,6 +30,11 @@ bool UIButton::is_hovered()
 
 void UIButton::render_impl()
 {
+    if (use_fill)
+    {
+        DrawRectangleRec(rect, fill_color);
+    }
+
     GuiLabelButton(rect, text.c_str());
 }
 
@@ -76,10 +83,14 @@ void UIDropDownList::render_impl()
     }
     else
     {
+        const auto width = (*std::ranges::max_element(m_items, [](const auto& a, const auto& b) {
+                return a->rect.width < b->rect.width;
+            }))->rect.width;
+
         const Rectangle scene_list_rect = {
             rect.x,
             rect.y + rect.height,
-            rect.width,
+            width,
             rect.height * m_items.size()
         };
 
@@ -114,22 +125,25 @@ void UIDropDownList::on_click_impl()
     m_state = State::CLOSED;
 }
 
-void UIDropDownList::add_item(const std::string &item, Callback on_click)
+void UIDropDownList::add_item(const std::string& item, Callback on_click)
 {
+    const float button_width = 
+        MeasureTextEx(GuiGetFont(), item.c_str(), GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
+
     m_items.push_back(
         std::make_unique<UIButton>(
             Rectangle {
                 rect.x,
                 rect.y + rect.height * (m_items.size() + 1),
-                rect.width,
+                button_width,
                 rect.height
             },
-            [this, item, pos = m_items.size()]() {
+            [this, item, button_width, pos = m_items.size()]() {
                 GuiLabelButton(
                     Rectangle {
                         rect.x,
                         rect.y + rect.height * (pos + 1),
-                        rect.width,
+                        button_width,
                         rect.height
                     },
                     item.c_str()
@@ -198,6 +212,7 @@ UITextBox::UITextBox()
     : on_edited{[](){}}
 {
     render = [this] { render_impl(); };
+    std::memset(m_buffer, 0, MAX_BUFFER_SIZE);
 }
 
 // TODO: UITextbox sollte wissen ob sich der content geändert hat
@@ -278,7 +293,7 @@ void UITextBox::render_impl()
 
 UIScrollView::UIScrollView()
 {
-    // yuck... abomination (TODO)
+    // yuck... abomination (TODO) -> render_impl should be pure virtual from UIElement
     render = [this] { render_impl(); };
 }
 
@@ -416,4 +431,95 @@ bool UIScrollView::check_if_in_view(const Entry& entry) const
 void UIScrollView::clear()
 {
     m_entries.clear();
+}
+
+UIWindowBase::UIWindowBase(const Rectangle& rect, const char* title)
+    : m_title{title} 
+{
+    this->rect = rect;
+
+    // TODO: see above
+    render = [this] { render_impl(); };
+    m_content_rect = {
+        .x = rect.x + 50,
+        .y = rect.y + 50,
+        .width = rect.width - 50 * 2,
+        .height = rect.height - 50 * 2
+    };
+}
+
+void UIWindowBase::open()
+{
+    m_state = State::OPEN;
+}
+
+void UIWindowBase::close()
+{
+    m_state = State::CLOSED;
+}
+
+bool UIWindowBase::is_open() const
+{
+    return m_state == State::OPEN;
+}
+
+void UIWindowBase::render_impl()
+{
+    if (m_state == State::OPEN)
+    {
+        // i know... but could'nt be bothered
+        if (GuiWindowBox(rect, m_title))
+        {
+            m_state = State::CLOSED;
+        }
+
+        DRAW_DEBUG_RECTANGLE(m_content_rect, BLUE);
+        render_content();
+    }
+}
+
+OpenProjectWindow::OpenProjectWindow(const Rectangle& rect)
+    : UIWindowBase(rect, "Open Project")
+{
+    m_textbox = std::make_unique<UITextBox>();
+    auto label_rect = m_content_rect;
+    label_rect.y += 20;
+    label_rect.height = 30;
+    m_textbox->rect = label_rect;
+
+    label_rect.y += 40;
+    label_rect.width = 60;
+
+    m_open_button = std::make_unique<UIButton>(label_rect, [this] {
+        std::cout << "open project: " << m_textbox->get_text() << std::endl;
+        Core::Application::get().get_layer<AppLayer>()->open_project();
+        close();
+    });
+
+    // TODO: too lazy to rewirte the UIButton... (normally this should use GuiButton, but current
+    // implementation uses GuiLabel...)
+    m_open_button->render = [rect = m_open_button->rect] {
+        GuiButton(rect, "Open");
+    };
+}
+
+bool OpenProjectWindow::process_input()
+{
+    if (m_open_button->is_hovered() && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && is_open())
+    {
+        m_open_button->on_click();
+        return true;
+    }
+
+    return m_textbox->process_input() || is_open();
+}
+
+void OpenProjectWindow::render_content()
+{
+    auto rect = m_textbox->rect;
+    rect.y -= 23;
+
+    GuiLabel(rect, "Enter path to project file (e.g. game.wsproj)");
+    m_textbox->render();
+    m_open_button->render();
 }

@@ -58,6 +58,8 @@ public:
     Callback on_click;
     Callback on_hover;
     std::string text;
+    Color fill_color = RAYWHITE;
+    bool use_fill = false;
 };
 
 class UITextBox : public UIElement
@@ -164,6 +166,44 @@ private:
     // the ptr should be be able to be droppped...
     // also UIButton maybe manages hiw own state "active"?
     std::vector<Entry> m_entries;
+};
+
+class UIWindowBase : public UIElement
+{
+public:
+    UIWindowBase(const Rectangle& rect, const char* name);
+    void open();
+    void close();
+    // bool process_input();
+    virtual void render_content() = 0;
+
+    bool is_open() const;
+private:
+    void render_impl();
+
+protected:
+    Rectangle m_content_rect;
+
+private:
+    // TODO: see above
+    std::vector<std::unique_ptr<UIButton>> m_buttons;
+    const char* m_title;
+    enum class State { CLOSED, OPEN };
+    State m_state = State::CLOSED;
+};
+
+// TODO: should probably be somewhere else
+class OpenProjectWindow : public UIWindowBase
+{
+public:
+    OpenProjectWindow(const Rectangle& rect);
+    bool process_input();
+    void render_content() override;
+
+private:
+    // TODO: ptr...
+    std::unique_ptr<UITextBox> m_textbox;
+    std::unique_ptr<UIButton> m_open_button;
 };
 
 class UIComponent

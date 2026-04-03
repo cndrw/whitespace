@@ -65,8 +65,9 @@ void AssetExplorer::set_root_dir(const std::filesystem::path& root)
 {
     m_root = root;
     // TODO: just temporary, should be embedded
-    FOLDER_TEXTURE = LoadTexture(R"(D:\Mein stuff\Ordner\Privat\Projects\whitespace\example\assets\folder_icon.png)");
-
+    // FOLDER_TEXTURE = LoadTexture(R"(D:\Mein stuff\Ordner\Privat\Projects\whitespace\example\assets\folder_icon.png)");
+    FOLDER_TEXTURE = LoadTexture(R"(D:\stuff\repos\whitespace\example\assets\folder_icon.png)");
+    
     // TOOD: should also not be here, tbd when initialization is reworked for UIComponents
     static constexpr auto margin_top   { 50 };
     static constexpr auto margin_left  { 10 };

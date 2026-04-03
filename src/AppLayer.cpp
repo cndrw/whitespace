@@ -6,8 +6,10 @@
 
 void AppLayer::open_project()
 {
-    m_project_root = std::filesystem::path(R"(D:\Mein stuff\Ordner\Privat\Projects\whitespace\example)");
-    const auto proj_file = m_project_root / "project.yaml";
+    // m_project_root = std::filesystem::path(R"(D:\Mein stuff\Ordner\Privat\Projects\whitespace\example)");
+    m_project_root = std::filesystem::path(R"(D:\stuff\repos\whitespace\example)");
+
+    const auto proj_file = m_project_root / "project.wsproj";
     const auto scene_name = "house.yaml";
 
     auto& app = Core::Application::get();

@@ -17,18 +17,40 @@
 FunctionRibbon::FunctionRibbon()
     : UIComponent{"Function Ribbon"}
 {
+    constexpr auto win_height = 150;
+    constexpr auto win_width  = 450;
+    const Vec2 screen_mid = Vector2{ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 };
+    m_open_project_window = std::make_unique<OpenProjectWindow>((Rectangle) {
+        screen_mid.x - win_width / 2,
+        screen_mid.y - win_height / 2 - 100,
+        win_width,
+        win_height
+    });
+
     m_scene_static_label = { 225, 0, 50, 20 };
     m_buttons = {
+        new UIDropDownList(
+            { 0, 0, 50, 20 },
+            "#005#File"
+        ),
         new UIDropDownList({
             m_scene_static_label.x + m_scene_static_label.width, 0, 50, 20 },
-            "#005#Open"),
+            "#005#Open"
+        ),
         make_button({ 100, 0, 50, 20 }, "#005#Save", []() {
             std::cout << "Current loaded save" << std::endl;
-        }),
-        make_button({ 0, 0, 50, 20 }, "#006#Load", []() {
-            Core::Application::get().get_layer<AppLayer>()->open_project();
         })
     };
+
+    auto* file_label = dynamic_cast<UIDropDownList*>(m_buttons[0]);
+    file_label->add_item("Open Project", [this] {
+        // Core::Application::get().get_layer<AppLayer>()->open_project();
+        m_open_project_window->open();
+    });
+
+    file_label->add_item("Create Project", [] {
+        std::cout << "Create Project" << std::endl;
+    });
 }
 
 FunctionRibbon::~FunctionRibbon()
@@ -62,7 +84,7 @@ bool FunctionRibbon::process_input()
         }
     }
 
-    return CheckCollisionPointRec(mouse_pos, m_outer_rect);
+    return CheckCollisionPointRec(mouse_pos, m_outer_rect) || m_open_project_window->process_input();
         
 }
 
@@ -83,8 +105,8 @@ UIButton* FunctionRibbon::make_button(
 
 void FunctionRibbon::update_ribbon(const ProjectMetadata& proj_data)
 {
-    auto* scene_label = dynamic_cast<UIDropDownList*>(m_buttons[0]);
-    auto& proj_label = m_buttons[1];
+    auto* scene_label = dynamic_cast<UIDropDownList*>(m_buttons[1]);
+    auto& proj_label = m_buttons[2];
 
     proj_label->render =
         [rect = proj_label->rect, proj_name = proj_data.project_name]() {
@@ -128,6 +150,8 @@ void FunctionRibbon::render()
     {
         label->render();
     }
+
+    m_open_project_window->render();
 }
 
 

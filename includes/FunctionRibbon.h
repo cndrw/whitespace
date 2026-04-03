@@ -24,4 +24,5 @@ private:
     Rectangle m_scene_static_label;
     std::vector<UIButton*> m_buttons; 
     std::vector<UIElement*> m_labels;
+    std::unique_ptr<OpenProjectWindow> m_open_project_window;
 };

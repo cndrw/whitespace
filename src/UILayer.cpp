@@ -72,8 +72,8 @@ void UILayer::render()
 {
     m_inspector.render();
     m_asset_explorer.render();
-    m_func_ribbon.render();
     m_hierachy.render();
+    m_func_ribbon.render();
 } 
 
 UILayer::~UILayer()
