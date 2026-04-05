@@ -1,7 +1,0 @@
-SpriteElements:
-  heart_4:
-    x: 320
-    y: 112
-    angle: 0
-    layer: 0
-    asset_ref: heart

@@ -120,13 +120,13 @@ void CanvasLayer::add_scene_element(const Core::Asset& asset)
     constexpr auto ppu { 16 };
     const Vec2 mpos = GetMousePosition();
     auto sprite_element = std::make_shared<SpriteElement>();
-    sprite_element->name = resolve_naming(asset.path);
+    sprite_element->name = resolve_naming(asset.rel_path);
     // sprite_element->texture = asset.texture;
     sprite_element->pos = mpos;
     sprite_element->ppu = ppu;
     sprite_element->width = asset.texture.width * ppu;
     sprite_element->height = asset.texture.height * ppu;
-    sprite_element->handle = asset.path.stem().string();
+    sprite_element->handle = asset.name;
     sprite_element->layer = 0;
 
     m_sprite_elements[0].push_back(sprite_element);
@@ -294,6 +294,7 @@ void CanvasLayer::draw_arrow(
 void CanvasLayer::save_scene()
 {
     YAML::Node scene;
+    const auto* am = Core::Application::get().get_asset_manager();
 
     for (const auto& [_, layer] : m_sprite_elements)
     {
@@ -303,7 +304,8 @@ void CanvasLayer::save_scene()
             scene["SpriteElements"][element->name]["y"] = element->pos.y;
             scene["SpriteElements"][element->name]["angle"] = element->angle;
             scene["SpriteElements"][element->name]["layer"] = static_cast<int>(element->layer);
-            scene["SpriteElements"][element->name]["asset_ref"] = element->handle;
+            scene["SpriteElements"][element->name]["asset_ref"] = am->get_asset(element->handle).rel_path.string();
+            // scene["SpriteElements"][element->name]["asset_ref"] = element->handle;
             std::cout << std::format("Save with asset_ref: {}\n", element->handle);
         }
     }
@@ -330,9 +332,14 @@ void CanvasLayer::load_scene(const std::string& scene_name)
         sprite_element->name = name;
         sprite_element->pos = { it.second["x"].as<float>(), it.second["y"].as<float>() };
         sprite_element->angle = it.second["angle"].as<float>();
-        Handle handle = it.second["asset_ref"].as<std::string>();
-        Core::Asset asset = am->get_asset(handle);
-        sprite_element->handle = handle; 
+
+        auto asset_path = std::filesystem::path(it.second["asset_ref"].as<std::string>());
+        Handle asset_handle = asset_path.stem().string();
+        Core::Asset asset = !am->exists(asset_handle) ?
+                            am->add_asset_from_relative(asset_path) :
+                            am->get_asset(asset_handle);
+
+        sprite_element->handle = asset.name; 
         // sprite_element->texture = asset.texture;
         sprite_element->ppu = ppu; // asset.ppu;
         sprite_element->width = asset.texture.width * ppu;

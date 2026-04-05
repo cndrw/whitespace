@@ -208,15 +208,21 @@ void UIComponent::set_rect(const Rectangle rect)
     };
 }
 
-UITextBox::UITextBox()
-    : on_edited{[](){}}
+UITextBox::UITextBox(const size_t buffer_size)
+    : on_edited{[](){}}, m_buffer_size{buffer_size}
 {
     render = [this] { render_impl(); };
-    std::memset(m_buffer, 0, MAX_BUFFER_SIZE);
+    m_buffer = new char[m_buffer_size];
+    std::memset(m_buffer, 0, m_buffer_size);
+}
+
+UITextBox::~UITextBox()
+{
+    delete[] m_buffer;
 }
 
 // TODO: UITextbox sollte wissen ob sich der content geändert hat
-//       -> muss nicht on_edited() callen 
+//       -> muss nicht on_edited() callen
 bool UITextBox::process_input()
 {
     bool click_processed = false;
@@ -232,6 +238,12 @@ bool UITextBox::process_input()
             m_edit_mode = false;
             on_edited();
         }
+    }
+
+    if (m_edit_mode && IsKeyPressed(KEY_V) && IsKeyDown(KEY_LEFT_CONTROL))
+    {
+        set_text(GetClipboardText());
+        return true;
     }
 
     // enter is not "processed", so canvas layer can update the sprite immediently
@@ -259,15 +271,15 @@ bool UITextBox::is_hovered()
     return CheckCollisionPointRec(GetMousePosition(), rect);
 }
 
-void UITextBox::set_text(const std::string &text)
+void UITextBox::set_text(const std::string& text)
 {
-    if (text.size() > MAX_BUFFER_SIZE)
+    if (text.size() > m_buffer_size)
     {
-        std::cerr << "[ERROR] UITextBox string given with 'set_text' exceeds the buffer size\n";
+        std::cerr << std::format("[ERROR] UITextBox string given with 'set_text' exceeds the buffer size of {}\n", m_buffer_size);
         return;
     }
 
-    std::memset(m_buffer, 0, MAX_BUFFER_SIZE);
+    std::memset(m_buffer, 0, m_buffer_size);
 
     for (std::size_t i = 0; i < text.size(); i++)
     {
@@ -280,6 +292,11 @@ void UITextBox::set_static(bool status)
     m_draw_label = status;
 }
 
+void UITextBox::clear()
+{
+    std::memset(m_buffer, 0, m_buffer_size);
+}
+
 void UITextBox::render_impl()
 {
     if (m_draw_label)
@@ -288,7 +305,7 @@ void UITextBox::render_impl()
         return;
     }
 
-    GuiTextBox(rect, m_buffer, MAX_BUFFER_SIZE, m_edit_mode);
+    GuiTextBox(rect, m_buffer, m_buffer_size, m_edit_mode);
 }
 
 UIScrollView::UIScrollView()
@@ -471,6 +488,7 @@ void UIWindowBase::render_impl()
         if (GuiWindowBox(rect, m_title))
         {
             m_state = State::CLOSED;
+            on_close();
         }
 
         DRAW_DEBUG_RECTANGLE(m_content_rect, BLUE);
@@ -481,7 +499,7 @@ void UIWindowBase::render_impl()
 OpenProjectWindow::OpenProjectWindow(const Rectangle& rect)
     : UIWindowBase(rect, "Open Project")
 {
-    m_textbox = std::make_unique<UITextBox>();
+    m_textbox = std::make_unique<UITextBox>(150);
     auto label_rect = m_content_rect;
     label_rect.y += 20;
     label_rect.height = 30;
@@ -491,9 +509,16 @@ OpenProjectWindow::OpenProjectWindow(const Rectangle& rect)
     label_rect.width = 60;
 
     m_open_button = std::make_unique<UIButton>(label_rect, [this] {
-        std::cout << "open project: " << m_textbox->get_text() << std::endl;
-        Core::Application::get().get_layer<AppLayer>()->open_project();
-        close();
+        std::cout << std::format("Open Project {}\n", m_textbox->get_text());
+
+        if (const auto res = Core::Application::get().get_layer<AppLayer>()->open_project(m_textbox->get_text()); res.first)
+        {
+            close();
+        }
+        else
+        {
+            m_erro_msg = res.second;
+        }
     });
 
     // TODO: too lazy to rewirte the UIButton... (normally this should use GuiButton, but current
@@ -505,7 +530,7 @@ OpenProjectWindow::OpenProjectWindow(const Rectangle& rect)
 
 bool OpenProjectWindow::process_input()
 {
-    if (m_open_button->is_hovered() && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && is_open())
+    if (m_open_button->is_hovered() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         m_open_button->on_click();
         return true;
@@ -522,4 +547,15 @@ void OpenProjectWindow::render_content()
     GuiLabel(rect, "Enter path to project file (e.g. game.wsproj)");
     m_textbox->render();
     m_open_button->render();
+
+    rect = m_open_button->rect;
+    rect.x += rect.width + 20;
+    rect.y += 10;
+    DrawText(m_erro_msg.c_str(), rect.x, rect.y, 14, RED);
+}
+
+void OpenProjectWindow::on_close()
+{
+    m_erro_msg.clear();
+    m_textbox->clear();
 }

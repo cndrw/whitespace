@@ -65,8 +65,9 @@ public:
 class UITextBox : public UIElement
 {
 public:
-    UITextBox();
-    virtual ~UITextBox() override = default;
+    UITextBox() : UITextBox(20) {}
+    explicit UITextBox(size_t buffer_size);
+    virtual ~UITextBox() override;
 
     bool process_input();
     void on_click();
@@ -76,6 +77,7 @@ public:
     void set_text(const std::string& text);
     std::string get_text() const { return std::string(m_buffer); };
     void set_static(bool status);
+    void clear();
 
 private:
     virtual void render_impl();
@@ -84,8 +86,8 @@ public:
     Callback on_edited;
 
 private:
-    static constexpr auto MAX_BUFFER_SIZE { 20 };
-    char m_buffer[MAX_BUFFER_SIZE];
+    char* m_buffer;
+    size_t m_buffer_size;
     bool m_edit_mode = false;
     bool m_draw_label = false;
 };
@@ -180,6 +182,7 @@ public:
     bool is_open() const;
 private:
     void render_impl();
+    virtual void on_close() {};
 
 protected:
     Rectangle m_content_rect;
@@ -199,11 +202,13 @@ public:
     OpenProjectWindow(const Rectangle& rect);
     bool process_input();
     void render_content() override;
+    void on_close() final override;
 
 private:
     // TODO: ptr...
     std::unique_ptr<UITextBox> m_textbox;
     std::unique_ptr<UIButton> m_open_button;
+    std::string m_erro_msg;
 };
 
 class UIComponent

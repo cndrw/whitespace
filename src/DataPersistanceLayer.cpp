@@ -15,7 +15,7 @@ void DataPersitanceLayer::save_scene(const YAML::Node &scene)
 {
 
     auto scene_name = Core::Application::get().get_layer<AppLayer>()->get_cur_scene_name();
-    const auto dest_path = m_root / (scene_name += ".yaml");
+    const auto dest_path = m_root / (scene_name += ".wsscene");
     std::ofstream fout(dest_path);
     fout << scene;
     std::cout << std::format("Saved in: {}\n", dest_path.string());

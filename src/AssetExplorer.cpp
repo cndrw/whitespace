@@ -83,6 +83,7 @@ void AssetExplorer::set_root_dir(const std::filesystem::path& root)
 
 void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
 {
+    static constexpr std::array<const char*, 2> VALID_EXTENSIONS = { ".png", ".jpg" };
     m_asset_prevs.clear();
 
     auto* am = Core::Application::get().get_asset_manager();
@@ -95,9 +96,10 @@ void AssetExplorer::build_explorer_view(const std::filesystem::path& dir)
         {
             dirs.push_back(make_dir_preview(entry));
         }
-        else
+        else if (std::ranges::find(VALID_EXTENSIONS, entry.path().extension()) != VALID_EXTENSIONS.end())
         {
             const auto path = entry.path();
+            
             if (!am->exists(path.stem().string()))
             {
                 am->add_asset(path);

@@ -4,32 +4,47 @@
 #include "DataPersistanceLayer.h"
 #include "UILayer.h"
 
-void AppLayer::open_project()
+AppLayer::Result<std::string> AppLayer::open_project(std::filesystem::path project_dir)
 {
-    // m_project_root = std::filesystem::path(R"(D:\Mein stuff\Ordner\Privat\Projects\whitespace\example)");
-    m_project_root = std::filesystem::path(R"(D:\stuff\repos\whitespace\example)");
+    if (!std::filesystem::exists(project_dir)) return {false, "Path is not valid."};
 
-    const auto proj_file = m_project_root / "project.wsproj";
-    const auto scene_name = "house.yaml";
+    std::filesystem::path proj_file;
 
-    auto& app = Core::Application::get();
-    app.get_layer<DataPersitanceLayer>()->set_saves_root((m_project_root / "scenes").string());
-    app.get_layer<UILayer>()->set_asset_root((m_project_root / "assets").string());
-    app.get_layer<CanvasLayer>()->load_scene(scene_name);
-
-    m_cur_proj_data.project_name = proj_file.stem().string();
-
-    for (const auto& entry : std::filesystem::directory_iterator(m_project_root / "scenes"))
+    // search for project file (there can only be one in a directory)
+    for (const auto& entry : std::filesystem::directory_iterator(project_dir))
     {
-        const auto path = entry.path();
-        if (path.extension() == ".yaml")
+        if (entry.path().extension() == ".wsproj")
         {
-            m_cur_proj_data.scene_list.push_back(path.stem().string());
+            proj_file = entry.path();
         }
     }
 
+    if (proj_file.empty()) return {false, "No project file found."};
+
+    m_project_root = project_dir;
+
+    // search for all scene files in this project
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(project_dir))
+    {
+        const auto e = entry.path();
+        if (e.extension() == ".wsscene" && !entry.is_directory())
+        {
+            m_cur_proj_data.scene_list.push_back(e.stem().string());
+        }
+    }
+
+    auto& app = Core::Application::get();
+    app.get_asset_manager()->set_root(m_project_root);
+    app.get_layer<DataPersitanceLayer>()->set_saves_root((m_project_root / "scenes").string());
+    app.get_layer<UILayer>()->set_asset_root(m_project_root.string());
+    app.get_layer<CanvasLayer>()->load_scene(m_cur_proj_data.scene_list[0] + ".wsscene");
+
+    m_cur_proj_data.project_name = proj_file.stem().string();
+
     m_cur_proj_data.active_scene_idx = 0;
     on_project_update.invoke(m_cur_proj_data);
+
+    return {true, ""};
 }
 
 void AppLayer::load_scene(const std::string& scene_name)
@@ -37,7 +52,7 @@ void AppLayer::load_scene(const std::string& scene_name)
     Core::Application::get().get_layer<UILayer>()->get_component<Hierachy>()->clear_all();
     auto* c_layer = Core::Application::get().get_layer<CanvasLayer>();
     c_layer->save_scene();
-    c_layer->load_scene(std::string{scene_name} += ".yaml");
+    c_layer->load_scene(std::string{scene_name} + ".wsscene");
 
     for (size_t i = 0; i < m_cur_proj_data.scene_list.size(); i++)
     {

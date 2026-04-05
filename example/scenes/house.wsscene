@@ -4,16 +4,16 @@ SpriteElements:
     y: 160
     angle: 0
     layer: 0
-    asset_ref: heart
+    asset_ref: assets\heart.png
   heart_1:
     x: 208
     y: 144
     angle: 9.367362e-39
     layer: 0
-    asset_ref: heart
+    asset_ref: assets\heart.png
   heart_3:
     x: 720
     y: 144
     angle: 60
     layer: 0
-    asset_ref: heart
+    asset_ref: assets\heart.png

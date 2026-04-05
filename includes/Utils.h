@@ -72,3 +72,17 @@ public:
 
 
 [[nodiscard]] bool IsMouseButtonPressedTwice(int button);
+
+
+class Res
+{
+public:
+    Res(const bool result, const std::string& msg) : msg{msg}, m_result{result} {}
+
+    inline operator bool() const { return m_result; }
+
+    std::string msg;
+
+private:
+    bool m_result;
+};

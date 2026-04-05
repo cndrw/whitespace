@@ -1,0 +1,13 @@
+SpriteElements:
+  heart_4:
+    x: 320
+    y: 112
+    angle: 0
+    layer: 0
+    asset_ref: assets\heart.png
+  smiley_1:
+    x: 544
+    y: 288
+    angle: 9.091861e-39
+    layer: 0
+    asset_ref: assets\smiley.png
