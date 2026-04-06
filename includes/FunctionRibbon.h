@@ -25,4 +25,5 @@ private:
     std::vector<UIButton*> m_buttons; 
     std::vector<UIElement*> m_labels;
     std::unique_ptr<OpenProjectWindow> m_open_project_window;
+    std::unique_ptr<CreateProjectWindow> m_create_project_window;
 };

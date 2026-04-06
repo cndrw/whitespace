@@ -211,6 +211,22 @@ private:
     std::string m_erro_msg;
 };
 
+class CreateProjectWindow : public UIWindowBase
+{
+public:
+    CreateProjectWindow(const Rectangle& rect);
+    bool process_input();
+    void render_content() override;
+    void on_close() final override;
+
+private:
+    // TODO: ptr...
+    std::unique_ptr<UITextBox> m_dir_textbox;
+    std::unique_ptr<UITextBox> m_name_textbox;
+    std::unique_ptr<UIButton> m_create_button;
+    std::string m_erro_msg;
+};
+
 class UIComponent
 {
 public:

@@ -20,11 +20,19 @@ FunctionRibbon::FunctionRibbon()
     constexpr auto win_height = 150;
     constexpr auto win_width  = 450;
     const Vec2 screen_mid = Vector2{ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 };
+
     m_open_project_window = std::make_unique<OpenProjectWindow>((Rectangle) {
         screen_mid.x - win_width / 2,
         screen_mid.y - win_height / 2 - 100,
         win_width,
         win_height
+    });
+
+    m_create_project_window = std::make_unique<CreateProjectWindow>((Rectangle) {
+        screen_mid.x - win_width / 2,
+        screen_mid.y - win_height / 2 - 100,
+        win_width,
+        win_height + 90
     });
 
     m_scene_static_label = { 225, 0, 50, 20 };
@@ -48,8 +56,8 @@ FunctionRibbon::FunctionRibbon()
         m_open_project_window->open();
     });
 
-    file_label->add_item("Create Project", [] {
-        std::cout << "Create Project" << std::endl;
+    file_label->add_item("Create Project", [this] {
+        m_create_project_window->open();
     });
 }
 
@@ -84,7 +92,7 @@ bool FunctionRibbon::process_input()
         }
     }
 
-    return CheckCollisionPointRec(mouse_pos, m_outer_rect) || m_open_project_window->process_input();
+    return CheckCollisionPointRec(mouse_pos, m_outer_rect) || m_open_project_window->process_input() || m_create_project_window->process_input();
         
 }
 
@@ -153,6 +161,7 @@ void FunctionRibbon::render()
     }
 
     m_open_project_window->render();
+    m_create_project_window->render();
 }
 
 

@@ -559,3 +559,71 @@ void OpenProjectWindow::on_close()
     m_erro_msg.clear();
     m_textbox->clear();
 }
+
+CreateProjectWindow::CreateProjectWindow(const Rectangle &rect)
+    : UIWindowBase(rect, "Create Project")
+{
+    m_dir_textbox = std::make_unique<UITextBox>(150);
+    auto label_rect = m_content_rect;
+    label_rect.y += 20;
+    label_rect.height = 30;
+    m_dir_textbox->rect = label_rect;
+
+    m_name_textbox = std::make_unique<UITextBox>(50);
+    label_rect.y += label_rect.height + 30;
+    m_name_textbox->rect = label_rect;
+
+    label_rect.y += 40;
+    label_rect.width = 60;
+
+    m_create_button = std::make_unique<UIButton>(label_rect, [this] {
+        std::cout << "create project\n";
+    });
+
+    // TODO: too lazy to rewirte the UIButton... (normally this should use GuiButton, but current
+    // implementation uses GuiLabel...)
+    m_create_button->render = [rect = m_create_button->rect] {
+        GuiButton(rect, "Create");
+    };
+
+}
+
+bool CreateProjectWindow::process_input()
+{
+    if (m_create_button->is_hovered() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        m_create_button->on_click();
+        return true;
+    }
+
+    return m_dir_textbox->process_input() || m_name_textbox->process_input() || is_open();
+}
+
+void CreateProjectWindow::render_content()
+{
+    DRAW_DEBUG_RECTANGLE(m_content_rect, MAGENTA);
+
+    auto rect = m_dir_textbox->rect;
+    rect.y -= 23;
+    GuiLabel(rect, "Enter directory path to save to:");
+    m_dir_textbox->render();
+
+    rect = m_name_textbox->rect;
+    rect.y -= 23;
+    GuiLabel(rect, "Enter name:");
+    m_name_textbox->render();
+
+    m_create_button->render();
+
+    rect = m_create_button->rect;
+    rect.x += rect.width + 20;
+    rect.y += 10;
+    DrawText(m_erro_msg.c_str(), rect.x, rect.y, 14, RED);
+}
+
+void CreateProjectWindow::on_close()
+{
+    m_erro_msg.clear();
+    m_dir_textbox->clear();
+    m_name_textbox->clear();
+}
