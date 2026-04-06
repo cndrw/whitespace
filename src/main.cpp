@@ -30,12 +30,10 @@ int main()
 
 - function ribbon
     - möglichkeit screen reference auszuwählen
-    - project öffnen -> path eingeben 
     - neues project erstellen
 
 - misc
     - ppu macht nicht wirklich sinn
-    - assets müssen gesaved werden
     - pfad soll in scene save files gespeichert werden?
     - eigentlich müssten hierachy scrollview und assetexplorer scrollen über die selbe basis laufen -> refactor
 

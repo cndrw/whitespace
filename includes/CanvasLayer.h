@@ -6,6 +6,7 @@
 #include <filesystem>
 
 #include "raylib.h"
+#include "yaml-cpp/yaml.h"
 
 #include "Layer.h"
 #include "SceneElement.h"
@@ -24,7 +25,7 @@ public:
     virtual bool process_input() override;
     virtual ~CanvasLayer();
     void save_scene();
-    void load_scene(const std::string& scene_name);
+    void load_scene(const YAML::Node& scene);
     void focus_element(const uint16_t id);
 
     Core::Event<const std::optional<SpriteElement>&> on_element_changed;

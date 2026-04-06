@@ -7,7 +7,6 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#include "yaml-cpp/yaml.h"
 
 #include "Application.h"
 #include "AssetManager.h"
@@ -313,14 +312,13 @@ void CanvasLayer::save_scene()
     Core::Application::get().get_layer<DataPersitanceLayer>()->save_scene(scene);
 }
 
-void CanvasLayer::load_scene(const std::string& scene_name)
+void CanvasLayer::load_scene(const YAML::Node& scene)
 {
     // clear current canvas
     m_sprite_elements.clear();
     m_focused_sprite_elem = nullptr;
 
     auto& app = Core::Application::get();
-    const auto scene = app.get_layer<DataPersitanceLayer>()->load_scene(scene_name);
 
     auto* const am = app.get_asset_manager();
     for (const auto& it : scene["SpriteElements"])

@@ -6,8 +6,14 @@ SpriteElements:
     layer: 0
     asset_ref: assets\heart.png
   smiley_1:
-    x: 544
+    x: 496
     y: 288
+    angle: 9.091861e-39
+    layer: 0
+    asset_ref: assets\smiley.png
+  smiley_2:
+    x: 768
+    y: 272
     angle: 9.091861e-39
     layer: 0
     asset_ref: assets\smiley.png
