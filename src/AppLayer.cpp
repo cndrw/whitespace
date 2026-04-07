@@ -1,8 +1,36 @@
+#include <fstream>
+
 #include "AppLayer.h"
 #include "Application.h"
 #include "CanvasLayer.h"
 #include "DataPersistanceLayer.h"
 #include "UILayer.h"
+
+
+namespace Fields
+{
+    static constexpr const char* NAME { "name" };
+    static constexpr const char* LAST_SCENE_OPEN { "lastSceneOpen" };
+}
+
+AppLayer::~AppLayer()
+{
+    std::filesystem::path path = (m_project_root / m_cur_proj_data.project_name).replace_extension(".wsproj");
+
+    try 
+    {
+        YAML::Node project_file = YAML::LoadFile(path.string());
+        project_file[Fields::LAST_SCENE_OPEN] = m_cur_proj_data.scene_list[m_cur_proj_data.active_scene_idx].scene_name;
+        std::ofstream fout(path);
+        fout << project_file;
+        std::cout << "Project settings saved!\n";
+        
+    }
+    catch (const YAML::BadFile& e)
+    {
+        std::cerr << std::format("[Error] Failed to save project file. Changed name of project file or project name?\n");
+    }
+}
 
 AppLayer::Result<std::string> AppLayer::open_project(std::filesystem::path project_dir)
 {
@@ -23,8 +51,8 @@ AppLayer::Result<std::string> AppLayer::open_project(std::filesystem::path proje
 
     m_project_root = project_dir;
     YAML::Node proj_file_content = YAML::LoadFile(proj_file.string());
-    m_cur_proj_data.project_name = proj_file_content["name"].as<std::string>();
-    m_cur_proj_data.last_opened_scene.scene_name = proj_file_content["lastSceneOpen"].as<std::string>();
+    m_cur_proj_data.project_name = proj_file_content[Fields::NAME].as<std::string>();
+    m_cur_proj_data.last_opened_scene.scene_name = proj_file_content[Fields::LAST_SCENE_OPEN].as<std::string>();
 
     // search for all scene files in this project
     for (const auto& entry : std::filesystem::recursive_directory_iterator(project_dir))
@@ -55,8 +83,6 @@ AppLayer::Result<std::string> AppLayer::open_project(std::filesystem::path proje
         ->load_scene(m_cur_proj_data.last_opened_scene.full_path().replace_extension(".wsscene"));
     app.get_layer<CanvasLayer>()->load_scene(data);
 
-
-    m_cur_proj_data.project_name = proj_file.stem().string();
 
     
     m_cur_proj_data.active_scene_idx =
@@ -89,9 +115,11 @@ void AppLayer::load_scene(const std::string& scene_name)
         if (m_cur_proj_data.scene_list[i].scene_name == scene_name)
         {
             m_cur_proj_data.active_scene_idx = i;
+            m_cur_proj_data.last_opened_scene = m_cur_proj_data.scene_list[i]; 
             break;
         }
     }
+
 
     on_project_update.invoke(m_cur_proj_data);
     std::cout << std::format("Switched to scene: {}\n", scene_name);

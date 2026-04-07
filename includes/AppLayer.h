@@ -34,7 +34,7 @@ public:
     AppLayer() = default;
     // virtual void init() override;
     // virtual void update() override;
-    ~AppLayer() {};
+    ~AppLayer();
 
     Result<std::string> open_project(std::filesystem::path project_file);
     void load_scene(const std::string& scene_name);

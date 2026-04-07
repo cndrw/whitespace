@@ -51,4 +51,8 @@ int main()
 
 - gibt es irgendeinen grudn warum pointer bei m_sprite_elemnts benutzt wird?
 
+
+# readme
+- der name vom projekt ist auch der name vom wsproj file
+
 */
