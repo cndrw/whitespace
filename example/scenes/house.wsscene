@@ -1,3 +1,4 @@
+project: project
 SpriteElements:
   heart_4:
     x: 320

@@ -293,7 +293,10 @@ void CanvasLayer::draw_arrow(
 void CanvasLayer::save_scene()
 {
     YAML::Node scene;
-    const auto* am = Core::Application::get().get_asset_manager();
+    auto& app = Core::Application::get();
+
+    const auto* am = app.get_asset_manager();
+    scene["project"] = app.get_layer<AppLayer>()->get_cur_project_name();
 
     for (const auto& [_, layer] : m_sprite_elements)
     {
@@ -304,12 +307,11 @@ void CanvasLayer::save_scene()
             scene["SpriteElements"][element->name]["angle"] = element->angle;
             scene["SpriteElements"][element->name]["layer"] = static_cast<int>(element->layer);
             scene["SpriteElements"][element->name]["asset_ref"] = am->get_asset(element->handle).rel_path.string();
-            // scene["SpriteElements"][element->name]["asset_ref"] = element->handle;
             std::cout << std::format("Save with asset_ref: {}\n", element->handle);
         }
     }
 
-    Core::Application::get().get_layer<DataPersitanceLayer>()->save_scene(scene);
+    app.get_layer<DataPersitanceLayer>()->save_scene(scene);
 }
 
 void CanvasLayer::load_scene(const YAML::Node& scene)

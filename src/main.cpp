@@ -17,9 +17,16 @@ int main()
 
 
 /* TODO: 
-- canvas 
+
+- road to mvp
     - strg+z einbauen
-    - ppu sollte nichtmehr hardcoded sein
+    - ppu macht nicht wirklich sinn
+    - scene ribbon muss jedesmal aktualisiert werden beim interagieren (da szenen nicht über editor gemacht werden)
+    - wenn man projekt wechselt
+        - hierachy muss aktualisiert werden
+        - nachdem ein projekt geöffnet wurde -> auch textbox buffer clearen
+
+- canvas 
     - scene elemente adden sollte über eine zentrale funktion laufen
     - scene elemente focus? sollte über eine zentrale funktion laufen
 
@@ -29,11 +36,8 @@ int main()
     - gibt komischen bugg wo ich ein neuen element aus asset explorer ziehe und es hat eine rotation?
 
 - function ribbon
-    - möglichkeit screen reference auszuwählen
-    - neues project erstellen
 
 - misc
-    - ppu macht nicht wirklich sinn
     - pfad soll in scene save files gespeichert werden?
     - eigentlich müssten hierachy scrollview und assetexplorer scrollen über die selbe basis laufen -> refactor
 
@@ -50,6 +54,8 @@ int main()
 - eigentlich braucht die handle nicht in der scene gespeichert zu werden, da sowie die pfade gespeichert werden
 
 - gibt es irgendeinen grudn warum pointer bei m_sprite_elemnts benutzt wird?
+
+- möglichkeit screen reference auszuwählen
 
 
 # readme

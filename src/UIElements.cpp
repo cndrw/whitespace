@@ -81,7 +81,7 @@ void UIDropDownList::render_impl()
     {
         GuiLabelButton(rect, m_header.c_str());
     }
-    else
+    else if (!m_items.empty())
     {
         const auto width = (*std::ranges::max_element(m_items, [](const auto& a, const auto& b) {
                 return a->rect.width < b->rect.width;
@@ -305,6 +305,7 @@ void UITextBox::render_impl()
         return;
     }
 
+    DRAW_DEBUG_RECTANGLE(rect, BLUE);
     GuiTextBox(rect, m_buffer, m_buffer_size, m_edit_mode);
 }
 
@@ -473,6 +474,7 @@ void UIWindowBase::open()
 void UIWindowBase::close()
 {
     m_state = State::CLOSED;
+    on_close();
 }
 
 bool UIWindowBase::is_open() const
@@ -487,8 +489,7 @@ void UIWindowBase::render_impl()
         // i know... but could'nt be bothered
         if (GuiWindowBox(rect, m_title))
         {
-            m_state = State::CLOSED;
-            on_close();
+            close();
         }
 
         DRAW_DEBUG_RECTANGLE(m_content_rect, BLUE);
@@ -530,6 +531,8 @@ OpenProjectWindow::OpenProjectWindow(const Rectangle& rect)
 
 bool OpenProjectWindow::process_input()
 {
+    if (!is_open()) return false; 
+
     if (m_open_button->is_hovered() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         m_open_button->on_click();
@@ -577,7 +580,17 @@ CreateProjectWindow::CreateProjectWindow(const Rectangle &rect)
     label_rect.width = 60;
 
     m_create_button = std::make_unique<UIButton>(label_rect, [this] {
-        std::cout << "create project\n";
+        auto file_path = (std::filesystem::path(m_dir_textbox->get_text()) / m_name_textbox->get_text());
+        file_path.replace_extension(".wsproj");
+
+        if (const auto res = Core::Application::get().get_layer<AppLayer>()->create_project(file_path); res.first)
+        {
+            close();
+        }
+        else
+        {
+            m_erro_msg = res.second;
+        }
     });
 
     // TODO: too lazy to rewirte the UIButton... (normally this should use GuiButton, but current
@@ -590,13 +603,17 @@ CreateProjectWindow::CreateProjectWindow(const Rectangle &rect)
 
 bool CreateProjectWindow::process_input()
 {
+    if (!is_open()) return false; 
+
     if (m_create_button->is_hovered() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    {
+    { 
         m_create_button->on_click();
         return true;
     }
+    bool processed = m_name_textbox->process_input();
+    processed = m_dir_textbox->process_input() || processed;
 
-    return m_dir_textbox->process_input() || m_name_textbox->process_input() || is_open();
+    return  processed || is_open();
 }
 
 void CreateProjectWindow::render_content()
@@ -610,6 +627,7 @@ void CreateProjectWindow::render_content()
 
     rect = m_name_textbox->rect;
     rect.y -= 23;
+    DRAW_DEBUG_RECTANGLE(rect, YELLOW);
     GuiLabel(rect, "Enter name:");
     m_name_textbox->render();
 

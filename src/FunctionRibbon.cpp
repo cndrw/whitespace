@@ -130,20 +130,22 @@ void FunctionRibbon::update_ribbon(const ProjectMetadata& proj_data)
         )
     );
 
-    const auto& active_scene = proj_data.scene_list[proj_data.active_scene_idx];
-    scene_label->set_header(active_scene.scene_name);
-
-    auto other_scenes = proj_data.scene_list;
-    // const auto it = std::ranges::find(other_scenes, active_scene);
-    const auto it = std::ranges::find_if(other_scenes, [active_scene](const auto& data) { return data.scene_name == active_scene.scene_name; });
-    other_scenes.erase(it);
-
-    scene_label->clear_items();
-    for (auto& item : other_scenes)
+    if (!proj_data.scene_list.empty())
     {
-        scene_label->add_item(item.scene_name, [scene_name = item.scene_name]() {
-            Core::Application::get().get_layer<AppLayer>()->load_scene(scene_name);
-        });
+        const auto& active_scene = proj_data.scene_list[proj_data.active_scene_idx];
+        scene_label->set_header(active_scene.scene_name);
+
+        auto other_scenes = proj_data.scene_list;
+        const auto it = std::ranges::find_if(other_scenes, [active_scene](const auto& data) { return data.scene_name == active_scene.scene_name; });
+        other_scenes.erase(it);
+
+        scene_label->clear_items();
+        for (auto& item : other_scenes)
+        {
+            scene_label->add_item(item.scene_name, [scene_name = item.scene_name]() {
+                Core::Application::get().get_layer<AppLayer>()->load_scene(scene_name);
+            });
+        }
     }
 }
 
