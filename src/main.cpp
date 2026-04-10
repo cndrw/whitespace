@@ -21,10 +21,10 @@ int main()
 - road to mvp
     - strg+z einbauen
     - ppu macht nicht wirklich sinn
+        - alles verbrennen!!!
     - scene ribbon muss jedesmal aktualisiert werden beim interagieren (da szenen nicht über editor gemacht werden)
-    - wenn man projekt wechselt
-        - hierachy muss aktualisiert werden
-        - nachdem ein projekt geöffnet wurde -> auch textbox buffer clearen
+        - wird sowieso gerade beim öffnen eines anderen projektes nicht gecleared??
+        - probably bei m_cur_proj nie wirklich gecleared wird?
 
 - canvas 
     - scene elemente adden sollte über eine zentrale funktion laufen

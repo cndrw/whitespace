@@ -61,6 +61,7 @@ AppLayer::Result<std::string> AppLayer::open_project(std::filesystem::path proje
     m_cur_proj_data.project_name = proj_file_content[Fields::NAME].as<std::string>();
     m_cur_proj_data.last_opened_scene.scene_name = proj_file_content[Fields::LAST_SCENE_OPEN].as<std::string>();
     m_cur_proj_data.active_scene_idx = 0;
+    m_cur_proj_data.scene_list.clear();
 
     // search for all scene files in this project
     for (const auto& entry : std::filesystem::recursive_directory_iterator(project_dir))
@@ -78,11 +79,6 @@ AppLayer::Result<std::string> AppLayer::open_project(std::filesystem::path proje
                 .save_dir = e.parent_path()
             });
             std::cout << std::format("Found scene: {}\n", m_cur_proj_data.scene_list.back().scene_name);
-
-            // if (e.stem().string() == m_cur_proj_data.last_opened_scene.scene_name)
-            // {
-            //     m_cur_proj_data.last_opened_scene.save_dir = e.parent_path();
-            // }
         }
     }
 
@@ -90,22 +86,17 @@ AppLayer::Result<std::string> AppLayer::open_project(std::filesystem::path proje
     app.get_asset_manager()->set_root(m_project_root);
     app.get_layer<DataPersitanceLayer>()->set_saves_root((m_project_root).string());
     app.get_layer<UILayer>()->set_asset_root(m_project_root.string());
+    app.get_layer<CanvasLayer>()->clear_scene();
+    app.get_layer<UILayer>()->get_component<Hierachy>()->clear_all();
 
     if (!m_cur_proj_data.scene_list.empty())
     {
         auto it = std::ranges::find_if(m_cur_proj_data.scene_list,
             [&sn = m_cur_proj_data.last_opened_scene.scene_name] (const auto& s) { return sn == s.scene_name; });
 
-        m_cur_proj_data.last_opened_scene = it == m_cur_proj_data.scene_list.end() ? m_cur_proj_data.scene_list[0] : *it;
+        SceneData startin_scene = it == m_cur_proj_data.scene_list.end() ? m_cur_proj_data.scene_list[0] : *it;
 
-        auto data = app.get_layer<DataPersitanceLayer>()
-            ->load_scene(m_cur_proj_data.last_opened_scene.full_path().replace_extension(".wsscene"));
-        app.get_layer<CanvasLayer>()->load_scene(data);
-        std::cout << std::format("Opened scene: {} ({})\n", m_cur_proj_data.last_opened_scene.scene_name, m_cur_proj_data.active_scene_idx);
-
-        m_cur_proj_data.active_scene_idx =
-            std::ranges::find(m_cur_proj_data.scene_list, m_cur_proj_data.last_opened_scene)
-            - m_cur_proj_data.scene_list.begin();
+        load_scene(startin_scene);
     }
 
     on_project_update.invoke(m_cur_proj_data);
@@ -144,37 +135,37 @@ void AppLayer::add_scene(SceneData scene)
 
 void AppLayer::load_scene(const std::string& scene_name)
 {
-    auto& app = Core::Application::get();
-    app.get_layer<UILayer>()->get_component<Hierachy>()->clear_all(); // TODO: actually not the task of applayer...
-    auto* c_layer = app.get_layer<CanvasLayer>();
+    // TODO: should be handle better... but for now only this is only here, using the base function
+    // results in unwanted behaviour when loading the first scene after opening the project
+    auto* c_layer = Core::Application::get().get_layer<CanvasLayer>();
     c_layer->save_scene();
 
     const auto scene =
-        std::ranges::find_if(m_cur_proj_data.scene_list, [scene_name] (const auto& scene) {
+        *std::ranges::find_if(m_cur_proj_data.scene_list, [scene_name] (const auto& scene) {
             return scene.scene_name == scene_name;
-        })->full_path().replace_extension(".wsscene");
+        });
 
-    auto data = app.get_layer<DataPersitanceLayer>()->load_scene(scene);
-    c_layer->load_scene(data);
-
-    for (size_t i = 0; i < m_cur_proj_data.scene_list.size(); i++)
-    {
-        if (m_cur_proj_data.scene_list[i].scene_name == scene_name)
-        {
-            m_cur_proj_data.active_scene_idx = i;
-            m_cur_proj_data.last_opened_scene = m_cur_proj_data.scene_list[i]; 
-            break;
-        }
-    }
-
-
-    on_project_update.invoke(m_cur_proj_data);
-    std::cout << std::format("Switched to scene: {}\n", scene_name);
+    load_scene(scene);
 }
 
-void AppLayer::load_scene(const SceneData& scene_name)
+void AppLayer::load_scene(const SceneData& scene)
 {
+    auto& app = Core::Application::get();
+    app.get_layer<UILayer>()->get_component<Hierachy>()->clear_all(); // TODO: actually not the task of applayer...
 
+    std::cout << std::format("path: {}\n name: {}\n", scene.save_dir.string(), scene.scene_name);
+
+    auto data = app.get_layer<DataPersitanceLayer>()->load_scene(scene.full_path().replace_extension(".wsscene"));
+    app.get_layer<CanvasLayer>()->load_scene(data);
+
+    m_cur_proj_data.active_scene_idx =
+        std::ranges::find(m_cur_proj_data.scene_list, scene)
+        - m_cur_proj_data.scene_list.begin();
+
+    m_cur_proj_data.last_opened_scene = scene;
+
+    on_project_update.invoke(m_cur_proj_data);
+    std::cout << std::format("Switched to scene: {}\n", scene.scene_name);
 }
 
 std::optional<SceneData> AppLayer::get_cur_scene() const

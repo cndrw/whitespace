@@ -25,6 +25,7 @@ public:
     virtual bool process_input() override;
     virtual ~CanvasLayer();
     void save_scene();
+    void clear_scene(); 
     void load_scene(const YAML::Node& scene);
     void focus_element(const uint16_t id);
 

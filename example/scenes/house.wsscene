@@ -1,20 +1,25 @@
 project: project
+editor:
+  zoom: 0.59873694
+  offset:
+    x: 312
+    y: 55
 SpriteElements:
-  heart_4:
-    x: 320
-    y: 112
-    angle: 0
+  heart_1:
+    x: 288
+    y: 304
+    angle: 9.09185e-39
     layer: 0
     asset_ref: assets\heart.png
-  smiley_1:
-    x: 496
-    y: 288
-    angle: 9.091861e-39
+  smiley - Kopie (2) - Kopie - Kopie_1:
+    x: 464
+    y: 304
+    angle: 9.09185e-39
     layer: 0
-    asset_ref: assets\smiley.png
-  heart_5:
-    x: 688
-    y: 112
-    angle: 9.275536e-39
+    asset_ref: assets\smiley - Kopie (2) - Kopie - Kopie.png
+  heart_2:
+    x: 720
+    y: 288
+    angle: 1.1020401e-38
     layer: 0
     asset_ref: assets\heart.png

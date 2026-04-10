@@ -1,8 +1,13 @@
 project: testing
+editor:
+  zoom: 0.59873694
+  offset:
+    x: 312
+    y: 55
 SpriteElements:
   screenshot_1:
-    x: -13968
-    y: -6464
-    angle: 1.0653079e-38
+    x: -24272
+    y: -11120
+    angle: 9.09185e-39
     layer: 0
     asset_ref: candy\screenshot.png

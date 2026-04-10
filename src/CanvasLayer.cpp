@@ -297,6 +297,9 @@ void CanvasLayer::save_scene()
 
     const auto* am = app.get_asset_manager();
     scene["project"] = app.get_layer<AppLayer>()->get_cur_project_name();
+    scene["editor"]["zoom"] = m_scale;
+    scene["editor"]["offset"]["x"] = m_origin.x;
+    scene["editor"]["offset"]["y"] = m_origin.y;
 
     for (const auto& [_, layer] : m_sprite_elements)
     {
@@ -314,13 +317,22 @@ void CanvasLayer::save_scene()
     app.get_layer<DataPersitanceLayer>()->save_scene(scene);
 }
 
-void CanvasLayer::load_scene(const YAML::Node& scene)
+void CanvasLayer::clear_scene()
 {
     // clear current canvas
     m_sprite_elements.clear();
     m_focused_sprite_elem = nullptr;
+}
+
+void CanvasLayer::load_scene(const YAML::Node& scene)
+{
+    clear_scene();
 
     auto& app = Core::Application::get();
+
+    m_scale = scene["editor"]["zoom"].as<float>();
+    m_origin.x = scene["editor"]["offset"]["x"].as<float>();
+    m_origin.y = scene["editor"]["offset"]["y"].as<float>();
 
     auto* const am = app.get_asset_manager();
     for (const auto& it : scene["SpriteElements"])

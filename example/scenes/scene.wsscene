@@ -1,4 +1,9 @@
 project: project
+editor:
+  zoom: 1
+  offset:
+    x: 0
+    y: 0
 SpriteElements:
   heart_4:
     x: 320
