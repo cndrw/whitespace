@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <vector>
+#include <string>
 
 #include "yaml-cpp/yaml.h"
 
@@ -34,7 +35,7 @@ public:
     using Result = std::pair<bool, T>;
 
     AppLayer() = default;
-    // virtual void init() override;
+    void init() final override;
     // virtual void update() override;
     ~AppLayer();
 
@@ -45,9 +46,13 @@ public:
     std::optional<SceneData> get_cur_scene() const;
     void add_scene(SceneData scene);
     inline std::string get_cur_project_name() const { return m_cur_proj_data.project_name; }
+    // TODO: i dont think this shoudl be handles like this
+    inline std::vector<std::filesystem::path> get_recent_projects() const { return m_recent_projects; }
+
     Core::Event<const ProjectMetadata&> on_project_update; 
 
 private:
     std::filesystem::path m_project_root;
     ProjectMetadata m_cur_proj_data;
+    std::vector<std::filesystem::path> m_recent_projects;
 };

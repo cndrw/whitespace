@@ -66,13 +66,98 @@ void UIImageButton::render_impl()
     );
 }
 
+UIDropDownList::UIDropDownList()
+{
+}
+
 UIDropDownList::UIDropDownList(
-    const Rectangle& rect_p,
-    const std::string& header)
-    : UIButton(rect_p, [](){}, [](){}), m_header(header)
+    const Rectangle &rect_p,
+    const std::string &header,
+    const ExpansionType exp_type,
+    const ActivationType act_type)
+    : UIButton(rect_p, []() {}, []() {})
+    , expansion_type{exp_type}
+    , activation_type{act_type}
+    , m_header(header)
 {
     render = [this]() { this->render_impl(); };
     on_click = [this]() { this->on_click_impl(); };
+    on_hover = [this] { on_hover_impl(); };
+}
+
+Rectangle UIDropDownList::get_new_position(const std::string& text, ExpansionType exp_type) const
+{
+    const float button_width = 
+        MeasureTextEx(GuiGetFont(), text.c_str(), GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
+
+    if (exp_type == ExpansionType::DOWN)
+    {
+        return {
+            .x = rect.x,
+            .y = rect.y + rect.height * (m_items.size() + 1),
+            .width = button_width,
+            .height = rect.height
+        };
+    }
+    else
+    {
+        return {
+            .x = rect.x + rect.width,
+            .y = rect.y + rect.height * m_items.size(),
+            .width = button_width,
+            .height = rect.height
+        };
+    }
+
+}
+
+void UIDropDownList::on_hover_impl()
+{
+    if (activation_type == ActivationType::HOVER)
+    {
+        m_state = is_hovered() ? State::OPENED : State::CLOSED;
+        return;
+    }
+
+
+    // for (const auto& item : m_items)
+    // {
+    //     if (item->is_hovered())
+    //     {
+    //         item->on_click();
+    //         m_state = State::CLOSED;
+    //         return;
+    //     }
+    // }
+
+    // m_state = State::CLOSED;
+
+    for (const auto& item : m_items)
+    {
+        if (item->is_hovered())
+        {
+            item->on_hover();
+            return;
+        }
+    }
+
+    // if (activation_type == ActivationType::HOVER)
+    // {
+    //     std::cout << "hey\n";
+    //     // TODO: also just quick'n dirty implemenation
+
+    //     for (const auto& item : m_items)
+    //     {
+    //         if (item->is_hovered())
+    //         {
+    //             item->on_click();
+    //             m_state = State::CLOSED;
+    //             return;
+    //         }
+    //     }
+
+    //     m_state = State::CLOSED;
+    // }
 }
 
 void UIDropDownList::render_impl()
@@ -88,8 +173,8 @@ void UIDropDownList::render_impl()
             }))->rect.width;
 
         const Rectangle scene_list_rect = {
-            rect.x,
-            rect.y + rect.height,
+            rect.x + rect.width * (expansion_type == ExpansionType::SIDE),
+            rect.y + rect.height * (expansion_type == ExpansionType::DOWN),
             width,
             rect.height * m_items.size()
         };
@@ -127,31 +212,38 @@ void UIDropDownList::on_click_impl()
 
 void UIDropDownList::add_item(const std::string& item, Callback on_click)
 {
-    const float button_width = 
-        MeasureTextEx(GuiGetFont(), item.c_str(), GuiGetStyle(DEFAULT, TEXT_SIZE), GuiGetStyle(DEFAULT, TEXT_SPACING)).x;
+    Rectangle button_rect = get_new_position(item, expansion_type);
 
     m_items.push_back(
         std::make_unique<UIButton>(
-            Rectangle {
-                rect.x,
-                rect.y + rect.height * (m_items.size() + 1),
-                button_width,
-                rect.height
-            },
-            [this, item, button_width, pos = m_items.size()]() {
-                GuiLabelButton(
-                    Rectangle {
-                        rect.x,
-                        rect.y + rect.height * (pos + 1),
-                        button_width,
-                        rect.height
-                    },
-                    item.c_str()
-                );
+            button_rect,
+            [this, button_rect, item]() {
+                GuiLabelButton(button_rect, item.c_str());
             },
             on_click
         )
     );
+
+    m_items.back()->text = item;
+}
+
+UIDropDownList& UIDropDownList::add_nested(const std::string& name, const ExpansionType exp_type)
+{
+
+    auto drop_down_menu = std::make_unique<UIDropDownList>(
+        get_new_position(name, expansion_type),
+        name,
+        exp_type,
+        ActivationType::HOVER
+    );
+
+    UIDropDownList& ref = *drop_down_menu;
+    ref.text = "nested";
+
+    m_items.push_back(std::move(drop_down_menu));
+    m_items.back()->on_hover();
+
+    return ref;
 }
 
 bool UIDropDownList::is_hovered()
@@ -174,7 +266,7 @@ bool UIDropDownList::is_hovered()
 
         for (const auto& item : m_items)
         {
-            if (CheckCollisionPointRec(mouse_pos, item->rect))
+            if (item->is_hovered())
                 return true;
         }
 
@@ -184,6 +276,12 @@ bool UIDropDownList::is_hovered()
         {
             m_state = State::CLOSED;
         }
+
+        if (activation_type == ActivationType::HOVER)
+        {
+            m_state = State::CLOSED;
+        }
+
         return false;
     }
 }

@@ -13,6 +13,27 @@ namespace Fields
     static constexpr const char* LAST_SCENE_OPEN { "lastSceneOpen" };
 }
 
+void AppLayer::init()
+{
+    const std::filesystem::path root(R"(D:\Mein stuff\Ordner\Privat\Projects\whitespace)");
+
+    std::cout << "try loading: " << (root / ".whitespace") << std::endl;
+    auto dot_file = YAML::LoadFile((root / ".whitespace").string().c_str());
+
+    std::vector<std::filesystem::path> recent_projects;
+    for (const auto& entry : dot_file["RecentProjects"])
+    {
+        recent_projects.push_back(entry.as<std::string>());
+    }
+
+    std::erase_if(
+        recent_projects,
+        [] (const auto& p) { return !std::filesystem::exists(p); }
+    );
+
+    m_recent_projects = recent_projects;
+}
+
 AppLayer::~AppLayer()
 {
     std::filesystem::path path = (m_project_root / m_cur_proj_data.project_name).replace_extension(".wsproj");
@@ -35,6 +56,15 @@ AppLayer::~AppLayer()
     {
         std::cerr << std::format("[Error] Failed to save project file. Changed name of project file or project name?\n");
     }
+
+    YAML::Node dot_file;
+    for (auto rp : m_recent_projects)
+    {
+        dot_file["RecentProjects"].push_back(rp.string());
+    }
+
+    std::ofstream fout(R"(D:\Mein stuff\Ordner\Privat\Projects\whitespace\.whitespace)");
+    fout << dot_file;
 }
 
 AppLayer::Result<std::string> AppLayer::open_project(std::filesystem::path project_dir)
@@ -97,6 +127,15 @@ AppLayer::Result<std::string> AppLayer::open_project(std::filesystem::path proje
         SceneData startin_scene = it == m_cur_proj_data.scene_list.end() ? m_cur_proj_data.scene_list[0] : *it;
 
         load_scene(startin_scene);
+    }
+
+    const auto res = std::ranges::any_of(m_recent_projects, [this] (const auto& rp) {
+        return m_project_root == rp.parent_path();
+    });
+
+    if (!res)
+    {
+        m_recent_projects.push_back((m_project_root / m_cur_proj_data.project_name).replace_extension(".wsproj"));
     }
 
     on_project_update.invoke(m_cur_proj_data);

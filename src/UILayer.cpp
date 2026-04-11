@@ -24,6 +24,8 @@ UILayer::UILayer()
 
 void UILayer::init()
 {
+    m_func_ribbon.init();
+
     Core::Application& app = Core::Application::get();
     auto* canvas_layer = app.get_layer<CanvasLayer>();
 

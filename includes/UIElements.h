@@ -119,20 +119,30 @@ public:
 class UIDropDownList : public UIButton 
 {
 public:
-    UIDropDownList() = default;
+    enum class ExpansionType { DOWN, SIDE };
+    enum class ActivationType { CLICK, HOVER };
 
-    UIDropDownList(const Rectangle& rect_p, const std::string& header);
+    UIDropDownList();
+
+    UIDropDownList(const Rectangle& rect_p, const std::string& header, ExpansionType exp_type, ActivationType act_type = ActivationType::CLICK);
 
     virtual ~UIDropDownList() = default;
 
     inline void clear_items() { m_items.clear(); }
     void add_item(const std::string& item, Callback on_click);
+    UIDropDownList& add_nested(const std::string& name, ExpansionType exp_type);
     inline void set_header(const std::string& header) { m_header = header; }
     virtual bool is_hovered() override;
 
+public:
+    ExpansionType expansion_type = ExpansionType::DOWN;
+    ActivationType activation_type = ActivationType::CLICK;
+
 private:
+    Rectangle get_new_position(const std::string& text, ExpansionType exp_type) const;
     void render_impl();
     void on_click_impl();
+    void on_hover_impl();
 
 
 private:

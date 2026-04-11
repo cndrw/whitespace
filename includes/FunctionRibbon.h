@@ -12,6 +12,7 @@ class FunctionRibbon : public UIComponent
 public:
     FunctionRibbon();
     ~FunctionRibbon();
+    void init();
     bool process_input();
     void render() override;
     UIButton* make_button(const Rectangle& rect, const char* label, const std::function<void()>& on_click);

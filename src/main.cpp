@@ -23,8 +23,6 @@ int main()
     - ppu macht nicht wirklich sinn
         - alles verbrennen!!!
     - scene ribbon muss jedesmal aktualisiert werden beim interagieren (da szenen nicht über editor gemacht werden)
-        - wird sowieso gerade beim öffnen eines anderen projektes nicht gecleared??
-        - probably bei m_cur_proj nie wirklich gecleared wird?
 
 - canvas 
     - scene elemente adden sollte über eine zentrale funktion laufen
@@ -36,6 +34,8 @@ int main()
     - gibt komischen bugg wo ich ein neuen element aus asset explorer ziehe und es hat eine rotation?
 
 - function ribbon
+    - dsa nested drop down list -> funktion gerade nur mit ach und krach mit genau diesem layout
+        - wenn das nested in der mitte war wurde es nicht resettet war is_hover dann nicht mehr gecallt wurde etc. (is hover hattte schon bei einem vorherigen item return daher keine weitere ausführung)
 
 - misc
     - pfad soll in scene save files gespeichert werden?

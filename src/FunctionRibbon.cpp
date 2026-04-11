@@ -39,26 +39,21 @@ FunctionRibbon::FunctionRibbon()
     m_buttons = {
         new UIDropDownList(
             { 0, 0, 50, 20 },
-            "#005#File"
+            "#005#File",
+            UIDropDownList::ExpansionType::DOWN
         ),
         new UIDropDownList({
             m_scene_static_label.x + m_scene_static_label.width, 0, 50, 20 },
-            "#005#Open"
+            "#005#Open",
+            UIDropDownList::ExpansionType::DOWN
         ),
         make_button({ 100, 0, 50, 20 }, "#005#Save", []() {
             std::cout << "Current loaded save" << std::endl;
         })
     };
 
-    auto* file_label = dynamic_cast<UIDropDownList*>(m_buttons[0]);
-    file_label->add_item("Open Project", [this] {
-        // Core::Application::get().get_layer<AppLayer>()->open_project();
-        m_open_project_window->open();
-    });
-
-    file_label->add_item("Create Project", [this] {
-        m_create_project_window->open();
-    });
+    m_buttons[1]->text = "scene_button";
+    m_buttons[2]->text = "save_button";
 }
 
 FunctionRibbon::~FunctionRibbon()
@@ -74,10 +69,33 @@ FunctionRibbon::~FunctionRibbon()
     }
 }
 
+void FunctionRibbon::init()
+{
+    const auto recent_projects = Core::Application::get().get_layer<AppLayer>()->get_recent_projects();
+    std::cout << "received: " << recent_projects.size() << std::endl;
+
+    auto* file_label = dynamic_cast<UIDropDownList*>(m_buttons[0]);
+
+    // Spaces just that the aligment works for now...
+    auto& sub_dp_list = file_label->add_nested("Open Recent..   ", UIDropDownList::ExpansionType::SIDE);
+    for (auto& rp : recent_projects)
+    {
+        const auto name = rp.stem().string();
+        sub_dp_list.add_item(name, [rp] { Core::Application::get().get_layer<AppLayer>()->open_project(rp.parent_path()); });
+    }
+
+    file_label->add_item("Open Project", [this] {
+        m_open_project_window->open();
+    });
+
+    file_label->add_item("Create Project", [this] {
+        m_create_project_window->open();
+    });
+}
+
 bool FunctionRibbon::process_input()
 {
     Vector2 mouse_pos = GetMousePosition();
-
 
     for (const auto& button : m_buttons)
     {
