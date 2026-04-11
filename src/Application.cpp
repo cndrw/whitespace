@@ -94,4 +94,9 @@ namespace Core
         return GetTime();
     }
 
+    std::filesystem::path Application::get_program_root() const
+    {
+        std::cout << PROGRAM_ROOT << std::endl;
+        return std::filesystem::path(PROGRAM_ROOT);
+    }
 }

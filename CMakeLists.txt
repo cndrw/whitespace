@@ -53,6 +53,10 @@ add_library(${PROJECT_NAME}_lib STATIC src/Application.cpp
 # add an executabel and assign files to it
 add_executable(${PROJECT_NAME}_exec src/main.cpp)
 
+target_compile_definitions(${PROJECT_NAME}_lib PRIVATE
+    PROGRAM_ROOT="${CMAKE_SOURCE_DIR}"
+)
+
 # include raylib.h
 # SYSTEM to supress warning (since it' a C API)
 target_include_directories(

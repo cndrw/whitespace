@@ -65,7 +65,7 @@ void AssetExplorer::set_root_dir(const std::filesystem::path& root)
 {
     m_root = root;
     // TODO: just temporary, should be embedded
-    const auto folder_icon_path = std::filesystem::current_path() / "example" / "assets" / "folder_icon.png";
+    const auto folder_icon_path = Core::Application::get().get_program_root() / "example" / "assets" / "folder_icon.png";
     FOLDER_TEXTURE = LoadTexture(folder_icon_path.string().c_str());
     
     // TOOD: should also not be here, tbd when initialization is reworked for UIComponents

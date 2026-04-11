@@ -15,10 +15,7 @@ namespace Fields
 
 void AppLayer::init()
 {
-    const std::filesystem::path root(R"(D:\Mein stuff\Ordner\Privat\Projects\whitespace)");
-
-    std::cout << "try loading: " << (root / ".whitespace") << std::endl;
-    auto dot_file = YAML::LoadFile((root / ".whitespace").string().c_str());
+    auto dot_file = YAML::LoadFile((Core::Application::get().get_program_root() / ".whitespace").string().c_str());
 
     std::vector<std::filesystem::path> recent_projects;
     for (const auto& entry : dot_file["RecentProjects"])

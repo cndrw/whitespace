@@ -39,6 +39,7 @@ namespace Core
 
         AssetManager* get_asset_manager();
         static float get_time();
+        std::filesystem::path get_program_root() const;
 
     private:
         std::vector<std::unique_ptr<Layer>> m_layers;
