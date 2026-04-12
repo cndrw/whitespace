@@ -434,7 +434,7 @@ bool CanvasLayer::process_input()
 
         if (IsKeyDown(KEY_SPACE) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
         {
-            m_origin += GetMouseDelta();
+            m_origin += Vec2(GetMouseDelta()) / m_scale;
         }
 
         return false;

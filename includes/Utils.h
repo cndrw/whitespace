@@ -39,8 +39,25 @@ public:
     }
 
     [[nodiscard]] constexpr Vec2& operator-=(const Vec2& other);
-    [[nodiscard]] constexpr Vec2 operator/(double val) const;
-    [[nodiscard]] constexpr Vec2 operator/(float val) const;
+
+    [[nodiscard]] constexpr Vec2 operator/(double val) const
+    {
+        if (val == 0)
+        {
+            throw std::invalid_argument("Can't divide Vec2 by zero.");
+        }
+
+        Vec2 res = *this;
+        res.x /= val;
+        res.y /= val;
+        return res;
+    }
+
+    [[nodiscard]] constexpr Vec2 operator/(float val) const
+    {
+        return *this / static_cast<double>(val);
+    }
+     
     [[nodiscard]] constexpr Vec2 operator+(const Vec2& other) const
     {
         return { x + other.x, y + other.y };

@@ -14,26 +14,6 @@ constexpr Vec2 &Vec2::operator-=(const Vec2& other)
     return *this;
 }
 
-[[nodiscard]]
-constexpr Vec2 Vec2::operator/(const double val) const
-{
-    if (val == 0)
-    {
-        throw std::invalid_argument("Can't divide Vec2 by zero.");
-    }
-
-    Vec2 res = *this;
-    res.x /= val;
-    res.y /= val;
-    return res;
-}
-
-
-[[nodiscard]]
-constexpr Vec2 Vec2::operator/(const float val) const
-{
-    return *this / static_cast<double>(val);
-}
 
 std::ostream& operator<<(std::ostream& stream, const Vec2& v)
 {
