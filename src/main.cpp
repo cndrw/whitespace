@@ -21,12 +21,11 @@ int main()
 - road to mvp
     - strg+z einbauen
     - extra grabable für falls burried element
-    - ppu macht nicht wirklich sinn
-        - alles verbrennen!!!
 
 - canvas 
     - scene elemente adden sollte über eine zentrale funktion laufen
     - scene elemente focus? sollte über eine zentrale funktion laufen
+    - irgendwie immernoch wenn man auf ein element klick -> moved eine unit
 
 - asset explorer
 

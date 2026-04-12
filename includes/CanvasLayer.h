@@ -51,6 +51,7 @@ private:
 private:
     std::map<uint8_t, std::vector<std::shared_ptr<SpriteElement>>> m_sprite_elements;
     std::shared_ptr<SpriteElement> m_focused_sprite_elem;
+    Rectangle m_priority_select;
     Vec2 m_sprite_drag_offset;
     Vec2 m_origin;
     float m_scale = 1;

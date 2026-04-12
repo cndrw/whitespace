@@ -1,0 +1,43 @@
+project: example
+editor:
+  zoom: 9.429115
+  offset:
+    x: 254.3306
+    y: 215.11919
+SpriteElements:
+  heart_8:
+    x: 369
+    y: 242
+    angle: 1e-44
+    layer: 0
+    asset_ref: assets\heart.png
+  heart_5:
+    x: 387
+    y: 230
+    angle: 1e-44
+    layer: 0
+    asset_ref: assets\heart.png
+  heart_4:
+    x: 381
+    y: 212
+    angle: 0
+    layer: 0
+    asset_ref: assets\heart.png
+  heart_6:
+    x: 358
+    y: 212
+    angle: 1e-44
+    layer: 0
+    asset_ref: assets\heart.png
+  heart_7:
+    x: 351
+    y: 230
+    angle: 1e-44
+    layer: 0
+    asset_ref: assets\heart.png
+  smiley_1:
+    x: 368
+    y: 226
+    angle: 9.091861e-39
+    layer: 0
+    asset_ref: assets\smiley.png

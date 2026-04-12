@@ -238,6 +238,10 @@ void CanvasLayer::render()
             1,
             MAGENTA
         );
+
+        Color prio_rect_color = RAYWHITE;
+        prio_rect_color.a = 128;
+        DrawRectangleRec(transform_to_screen(m_priority_select), prio_rect_color);
     }
 }
 
@@ -245,6 +249,12 @@ void CanvasLayer::render()
 //       - maybe split into to seperate functions 
 std::shared_ptr<SpriteElement> CanvasLayer::determine_focused_element(const Vector2 cursor_pos)
 {
+    // check if prio rect is used
+    if (CheckCollisionPointRec(cursor_pos, transform_to_screen(m_priority_select)))
+    {
+        return m_focused_sprite_elem;
+    }
+
     for (auto& [_, elements] : m_sprite_elements | std::views::reverse)
     {
         for (int i = elements.size() - 1; i >= 0; i--)
@@ -440,6 +450,7 @@ bool CanvasLayer::process_input()
         return false;
     }
 
+
     if (IsKeyPressed(KeyboardKey::KEY_DELETE))
     {
         remove_scene_element(m_focused_sprite_elem);
@@ -459,5 +470,19 @@ bool CanvasLayer::process_input()
         on_element_changed.invoke(*m_focused_sprite_elem);
     }
 
+    const auto elem_rect = m_focused_sprite_elem->rect();
+    Vec2 mid_point = Vector2 {
+        elem_rect.x + elem_rect.width / 2,
+        elem_rect.y + elem_rect.height / 2,
+    };
+
+    constexpr auto prio_rect_offset { 1.f };
+    m_priority_select = {
+        .x = mid_point.x - prio_rect_offset,
+        .y = mid_point.y - prio_rect_offset,
+        .width = prio_rect_offset * 2,
+        .height = prio_rect_offset * 2
+    };
+    
     return false;
 }
