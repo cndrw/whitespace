@@ -15,7 +15,6 @@ namespace Core
             .rel_path = std::filesystem::relative(path, m_root),
             .name = path.stem().string(),
             .texture = LoadTexture(path.string().c_str()),
-            .ppu = 32 // TODO: set default back to 100
         };
     }
 
@@ -25,7 +24,6 @@ namespace Core
             .rel_path = path,
             .name = path.stem().string(),
             .texture = LoadTexture((m_root / path).string().c_str()),
-            .ppu = 32 // TODO: set default back to 100
         };
     }
 

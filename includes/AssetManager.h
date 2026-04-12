@@ -17,7 +17,6 @@ namespace Core
         std::filesystem::path rel_path;
         std::string name;
         Texture2D texture;
-        uint32_t ppu;
     } Asset;
 
     class AssetManager

@@ -116,15 +116,13 @@ void CanvasLayer::init()
 
 void CanvasLayer::add_scene_element(const Core::Asset& asset)
 {
-    constexpr auto ppu { 16 };
     const Vec2 mpos = GetMousePosition();
     auto sprite_element = std::make_shared<SpriteElement>();
     sprite_element->name = resolve_naming(asset.rel_path);
-    // sprite_element->texture = asset.texture;
+    
     sprite_element->pos = mpos;
-    sprite_element->ppu = ppu;
-    sprite_element->width = asset.texture.width * ppu;
-    sprite_element->height = asset.texture.height * ppu;
+    sprite_element->width = asset.texture.width;
+    sprite_element->height = asset.texture.height;
     sprite_element->handle = asset.name;
     sprite_element->layer = 0;
 
@@ -339,7 +337,6 @@ void CanvasLayer::load_scene(const YAML::Node& scene)
     {
         const std::string name = it.first.as<std::string>();
 
-        constexpr auto ppu { 16 };
         auto sprite_element = std::make_shared<SpriteElement>();
         sprite_element->name = name;
         sprite_element->pos = { it.second["x"].as<float>(), it.second["y"].as<float>() };
@@ -352,10 +349,8 @@ void CanvasLayer::load_scene(const YAML::Node& scene)
                             am->get_asset(asset_handle);
 
         sprite_element->handle = asset.name; 
-        // sprite_element->texture = asset.texture;
-        sprite_element->ppu = ppu; // asset.ppu;
-        sprite_element->width = asset.texture.width * ppu;
-        sprite_element->height = asset.texture.height * ppu;
+        sprite_element->width = asset.texture.width;
+        sprite_element->height = asset.texture.height;
         sprite_element->layer = 0;
 
         m_sprite_elements[0].push_back(sprite_element);
@@ -458,10 +453,7 @@ bool CanvasLayer::process_input()
     if (IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT))
     {
         Vec2 pos = transform_to_canvas(cursor_pos - m_sprite_drag_offset);
-        pos = {
-            std::floor(pos.x / m_focused_sprite_elem->ppu) * m_focused_sprite_elem->ppu,
-            std::floor(pos.y / m_focused_sprite_elem->ppu) * m_focused_sprite_elem->ppu
-        }; 
+        pos = { std::floor(pos.x), std::floor(pos.y) }; 
         
         m_focused_sprite_elem->pos = pos;
         on_element_changed.invoke(*m_focused_sprite_elem);

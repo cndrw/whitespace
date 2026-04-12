@@ -83,8 +83,7 @@ void Inspector::setup_labels(DisplayType disp_t)
         {
             set_label("Name:", 0, m_focused_asset.name);
             m_labels[0].text_box->set_static(true);
-            set_label("PPU:", 1, m_focused_asset.ppu);
-            m_label_count = 2;
+            m_label_count = 1;
             break;
         }
         default:

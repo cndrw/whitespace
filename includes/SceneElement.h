@@ -27,7 +27,6 @@ public:
     float width;
     float height;
     float angle;
-    int ppu;
     uint8_t layer = 0;
 
 private:
